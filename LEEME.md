@@ -1,307 +1,171 @@
 MiConfig
 ========
 
-ConfigFrame es una unidad de Lazarus, que puede ser usada para crear fácilmente formularios de configuración.
+## Descripción
 
-Es una unidad (librería) desarrollada en Lazarus que contiene un Frame que servirá como base para la creación de Frames de Configuración.
+MiConfig es una librería de Lazarus, que puede ser usada para crear fácilmente formularios de configuración.
 
-Los frames de configuración se usan para crear una ventana de configuración, de acuerdo a la siguiente estructura:
+Con esta librería se simplifica considerablemente, la creación de ventanas de configuración, porque la librería incluye métodos predefinidos que facilitan la manipulación de variables (propiedades) de la aplicación, de modo que editarlos en un diálogo y guardar los cambios a disco, se hacen de forma casi transparente.
 
-```
-                             +-------------------+
-                             |                   | 
-                         +---|   Configuration   | 
-                         |   |       Frame       | 
-                         |   +-------------------+
-+-------------------+    |
-|                   |----+   +-------------------+
-|    Configuration  |        |                   | 
-|        Form       |--------|   Configuration   |  
-|                   |        |       Frame       |
-|                   |----+   +-------------------+
-+-------------------+    |
-                         |   +-------------------+
-                         |   |                   | 
-                         +---|   Configuration   | 
-                             |       Frame       | 
-                             +-------------------+
-```
+Se pueden usar archivos INI o XML.
 
-Este nuevo Frame incluye métodos predefinidos que facilitan la manipulación de variables (propiedades) de la aplicación, de modo que editarlos en un diálogo y guardar los cambios a disco, se hacen de forma casi transparente.
-
-Con esta librería se simplifica considerablemente, la creación de ventanas de configuración.
-
-Se asume que se trabajará con un archivo INI, en donde se guardarán las variables de trabajo.
-
-Con la unidad "ConfigFrame", se puede crear Frames de configuración tan simples
-como este:
+Con la librería "MiConfig", se pueden crear formularios de configuración sencillos como este:
 
 ```
-unit frameTexto;
+unit FormConfig;
 {$mode objfpc}{$H+}
-
 interface
-uses
-  Classes, SysUtils, Forms, Controls, StdCtrls, ConfigFrame; 
+uses ..., MiConfigINI;  
 
 type
-  TfraTexto = class(TCfgFrame)
+  TConfig = class(TForm)
+    BitCancel: TBitBtn;
+    BitAceptar: TBitBtn;
     Edit1: TEdit;
+    procedure BitAceptarClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   public
-    //variables de propiedades
-    texto : string;
-    procedure Iniciar(secINI0: string); //Inicia el frame
-  end;
-
-implementation
-{$R *.lfm}
-
-procedure TfraTexto.Iniciar(secINI0: string);
-begin
-  secINI := secINI0;  //sección INI
-  //asocia propiedades a controles
-  Asoc_Str_TEdit(@texto, Edit1, 'texto', '');
-end;
-
-end.
-```
-
-Y aún con este código tan simple, el frame permitirá editar el valor de la variable
-"texto" con el control "Edit1", y guardar los cambios a disco o leerlos desde allí.
-
-## Modo de uso
-
-Para usar ConfigFrame, se recomienda seguir el modelo de diseño sugerido. Que consiste en crear primero un formulario de configuración y luego uno o más Frames de configuración, que serán incluidos en el formulario de configuración.
-
-Tal vez el método más sencillo de crear un formulario de configuración con sus respectivos frames, es usar uno de los proyectos ejemplos, como Sample3, y copiar los archivos FormConfig.lfm, FormConfig.pas y todos los archivos de tipo FrameCfg\*.* a la carpeta de nuestro proyecto. Luego, simplemente incluir el código para iniciar y guardar el archivo de configuración en nuestro programa principal:
-
-```
-procedure TForm1.FormShow(Sender: TObject);
-begin
-  Config.Iniciar(self);   
-end;
-
-procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-begin
-  Config.escribirArchivoIni;  //guarda la configuración actual
-end;
-```
-
-Y en alguna parte del programa, para mostrar el formulario de configuración, usar:
-
-```
-  Config.Mostrar;
-```
-
-A partir de allí se pueden modificar los frames de configuración, para adecuarlos a nuestras necesidades.
-
-Es importante asegurarse que el formulario FormConfig, se carge al iniciar el programa (de otra forma se generará un error en tiempo de ejecución). Esto se puede hacer por código o usando el menú: "Proyecto>Opciones de Proyecto>Formulario".
-
-## Creando un nuevo Frame de Configuración
-
-Para crear un frame de configuración, se puede seguir este procedimiento:
-
-1. Copiar los archivos de la librería a una carpeta determinada.
-2. Abrir el Inspector de Proyecto e incluir el archivo "ConfigFrame.pas", desde la carpeta donde se guardó la librería.
-3. Abrir el archivo "ConfigFrame.pas", en el editor y mostrar el Frame (F12).
-4. En el menú principal, elegir "Archivo>Nuevo", luego en el cuadro mostrado, elegir "Componente heredado>Componente de proyecto heredado".
-5. Elegir "ConfigFrame" y ya se tendrá un frame de configuración, listo para incluir los controles que se usarán para mostrar las propiedades.
-
-Lo primero que se recomienda hacer con un nuevo frame de configuración es, cambiar el nombre de la unidad (que debe estar como UnitX) a algo como frameCfgGeneral. Luego se debe cambiar el nombre del frame mismo, usando el inspector de objetos. El nombre del frame (no de la unidad que lo contiene), debe ser algo así como fraCfgGeneral.
-
-Una vez creado el frame y con los nombres configurados, se tendrá un código como este:
-
-```
-unit frameCfgGeneral;
-{$mode objfpc}{$H+}
-interface
-uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ConfigFrame;
-
-type
-  TfraCfgGeneral = class(TConfigFrame)
-  private
-    { private declarations }
-  public
-    { public declarations }
+    //vars to manage
+    MyText : string;
+    procedure Initiate;
   end;
 
 var
-  fraCfgGeneral: TfraCfgGeneral;
+  Config: TConfig;
 
 implementation
 {$R *.lfm}
-
-end.
-```
-
-Sobre este código, se debe crear un método de inicio, que permita asociar los controles (o variables) al archivo INI. El código funcional,pero sin asociaciones, sería este:
-
-```
-unit FrameCfgGeneral;
-{$mode objfpc}{$H+}
-interface
-uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ConfigFrame;
-
-type
-
-  { TfraCfgGeneral }
-  TfraCfgGeneral = class(TCfgFrame)
-    Edit1: TEdit;
-  public
-    { public declarations }
-    procedure Iniciar(secINI0: string); //Inicia el frame
-  end;
-
-implementation
-{$R *.lfm}
-
-{ TfraCfgGeneral }
-procedure TfraCfgGeneral.Iniciar(secINI0: string);
+procedure TConfig.Initiate;
 begin
-  secINI := secINI0;  //sección INI
+  //asociate vars to controls
+  iniFile.Asoc_Str('MyText', @MyText, Edit1, '');
+  iniFile.FileToProperties;
+end;
+
+procedure TConfig.FormShow(Sender: TObject);
+begin
+  iniFile.PropertiesToWindow;
+end;
+
+procedure TConfig.BitAceptarClick(Sender: TObject);
+begin
+  iniFile.WindowToProperties;
+  self.Close;
 end;
 
 end.
 ```
 
-A partir de esta código mínimo, se deben ir agregando las variables y controles, que se desean preservar en el archivo INI, como se mostró en el primer código de ejemplo.
+Con este código se podrá editar el valor de la variable "texto" con el control "Edit1", y guardar los cambios a disco o leerlos desde allí.
+
+## Modo de uso
+
+La librería puede trabajar en 3 formas:
+
+1. Asociando propiedades a controles y a un archivo:
+2. Asociando solamente propiedades a un archivo:
+3. Asociando solamente propiedades a controles:
+
+### Asociando propiedades a controles y a un archivo:
+
+Esta es la forma más común, cuando se trabaja con formularios o diálogos de configuración, ya que es deseable poder modificar ciertas propiedades de la aplicación y mantener estos cambios en disco.
+
+El siguiente diagrama muestra el flujo de información, y los métodos que permiten realizar ese flujo:
+
+```
+ +-----------+                  +-------------+                    +------------+
+ |           | FileToProperties |             | PropertiesToWindow |            |
+ |           | ---------------> |             | -----------------> |            |
+ |   Disco   |                  | Variables   |                    | Controles  |
+ |  (File)   | PropertiesToFile |(Properties) | WindowToProperties | (Window)   |
+ |           | <--------------- |             | <----------------- |            |
+ +-----------+                  +-------------+                    +------------+
+```
+
+De acuerdo al formato de archivo a manejar, se deberá usar la unidad TMiConfigINI o TMiConfigXML. 
+
+Para empezar a trabajar, se debe crear una instancia del objeto TMiConfigINI (o TMiConfigXML, si se quiere trabajar con XML). También se puede usar el objeto "iniFile" (o "xmlFIle") que se crea por defecto con la unidad.
+
+Luego se deben crear asociaciones de las variables a guardar, y los controles que permitirán modificar estas variables. Para ello, existen un conjunto de métodos que permiten realizar estas asociaciones:
+
+    Asoc_Int();
+    Asoc_Dbl()
+    Asoc_Str()
+    Asoc_Bol()
+    Asoc_Enum()
+
+Estos métodos están sobrecargados, para permitir la asociación con diversos controles. Así por ejemplo, es posible asociar un entero a un control TEdit, pero también se puede asociar a un TSpinEdit.
+
+Después de crear las asociaciones, solo resta llamar a los métodos:
+
+* FileToProperties 
+* PropertiesToWindow 
+* PropertiesToFile 
+* WindowToProperties 
+
+Para realizar el movimiento de datos. Así por ejemplo, lo normal es leer todas las propiedades al iniciar la aplicación, entonces se debe llamar a FileToProperties() en el evento OnCreate o en el evento OnShow (recomendado).
+
+También es común que al terminar la aplicación se llame a PropertiesToFile() para mantener el valor de las variables asociadas.
+ 
+Todo este manejo de las propiedades, se puede hacer en el formulario principal, pero lo recomendable es crear un formulario especial o diálogo, de configuración, de modo que incluya los botones ACPETAR y CANCELAR. En este caso, solo cuando se acepten los cambios se debe llamar a WindowToProperties().
+
+Para ver el código de una implementación de este tipo, se recomienda leer los proyectos de ejemplo que vienen en la librería.
+ 
+### Asociando solamente propiedades a un archivo:
+ 
+Esta forma de trabajo, se puede usar cuando no es necesario editar las propiedades en controles, porque usualmente tienen otros medio para modificarse, como podría ser el ancho o el alto de la ventana principal.
+
+```
+ +-----------+                  +-------------+ 
+ |           | FileToProperties |             | 
+ |           | ---------------> |             | 
+ |   Disco   |                  | Variables   | 
+ |  (File)   | PropertiesToFile |(Properties) | 
+ |           | <--------------- |             | 
+ +-----------+                  +-------------+ 
+```
+
+### Asociando solamente propiedades a controles:
+
+```
+                                +-------------+                    +------------+
+                                |             | PropertiesToWindow |            |
+                                |             | -----------------> |            |
+                                | Variables   |                    | Controles  |
+                                |(Properties) | WindowToProperties | (Window)   |
+                                |             | <----------------- |            |
+                                +-------------+                    +------------+
+```
+
+								
 
 Para mayor información, revisar los códigos de ejemplo, de la página web.
 
-## Métodos para asociar controles
-
-Existen diversos métodos para asociar variables a controles:
-```
-    procedure Asoc_Int_TEdit(ptrInt: pointer; edit: TEdit; etiq: string;
-                             defVal: integer; minVal, maxVal: integer);
-    procedure Asoc_Int_TSpinEdit(ptrInt: pointer; spEdit: TSpinEdit; etiq: string;
-                             defVal: integer);
-    procedure Asoc_Dbl_TEdit(ptrDbl: pointer; edit: TEdit; etiq: string;
-                             defVal: double; minVal, maxVal: double);
-    procedure Asoc_Dbl_TFloatSpinEdit(ptrDbl: pointer; spEdit: TFloatSpinEdit; etiq: string;
-                             defVal: double);
-    procedure Asoc_Str_TEdit(ptrStr: pointer; edit: TCustomEdit; etiq: string;
-                             defVal: string);
-    procedure Asoc_Str_TEditButton(ptrStr: pointer; edit: TCustomEditButton; etiq: string;
-                             defVal: string);
-    procedure Asoc_Str_TCmbBox(ptrStr: pointer; cmbBox: TComboBox; etiq: string;
-                             defVal: string);
-    procedure Asoc_StrList_TListBox(ptrStrList: pointer; lstBox: TlistBox; etiq: string);
-    procedure Asoc_Bol_TChkBox(ptrBol: pointer; chk: TCheckBox; etiq: string;
-                             defVal: boolean);
-    procedure Asoc_Col_TColBut(ptrInt: pointer; colBut: TColorButton; etiq: string;
-                             defVal: TColor);
-    procedure Asoc_Enum_TRadBut(ptrEnum: pointer; EnumSize: integer;
-                    radButs: array of TRadioButton; etiq: string; defVal: integer);
-    procedure Asoc_Enum_TRadGroup(ptrEnum: pointer; EnumSize: integer;
-                    radGroup: TRadioGroup; etiq: string; defVal: integer);
-    procedure Asoc_Bol_TRadBut(ptrBol: pointer;
-                    radButs: array of TRadioButton; etiq: string; defVal: boolean);
-```
-
-También, si tan solo queremos almacenar las variables en un archivo INI, existen los métodos apropiados:
-
-```
-procedure Asoc_Bol(ptrBol: pointer; etiq: string; defVal: boolean);
-procedure Asoc_Int(ptrInt: pointer; etiq: string; defVal: integer);
-procedure Asoc_Str(ptrStr: pointer; etiq: string; defVal: string);
-procedure Asoc_StrList(ptrStrList: pointer; etiq: string);
-```
-
-Se incluye un ejemplo sencillo en donde se implementa una ventana de configuración que usa dos Frames, que se han implementado con pocas líneas de código.
-
-## Flujo de información
-
-ConfigFrame se basa en que la información de las propiedades (variables) se mueven de acuerdo al siguiente flujo:
-
-```
- +-----------+                  +-------------+                 +------------+
- |           | ReadFileToProp() |             |  PropToWindow() |            |
- |           | ---------------> |             | --------------> |            |
- |   Disco   |                  | Propiedades |                 | Formulario |
- |           | SavePropToFile() |             |  WindowToProp() |            |
- |           | <--------------- |             | <-------------- |            |
- +-----------+                  +-------------+                 +------------+
-```
-
-Sobre las flechas, se muestra el nombre del método de ConfigFrame que realiza el movimiento de información.
-
-El movimiento de las variables desde disco, se suele hacer solo una vez al iniciar el programa (llamando a la instrucción ReadFileToProp_AllFrames(), que llama a ReadFileToProp() de todos los frames de configuración). Y el movimiento de datos hacia disco se suele hacer al finalizar el programa (llamando a SavePropToFile_AllFrames()), pero puede hacerse cada vez que se cambia alguna de las propiedades, para tener la seguridad de que los cambios se mantendrán siempre actualizados en disco.
-
-Visualmente, lo que se muestra, para editar las propiedades, es el formulario de configuración (realmente se editan en un frame de configuración), y cuando se aceptan los cambios, se produce la actualización de las propiedades.
-
-Las propiedades que se registran sin parte visual (usando Asoc_Bol, Asoc_Int, ...), tienen el siguiente flujo:
-                                                          
-```
-+-----------+                  +-------------+
-|           | ReadFileToProp() |             |
-|           | ---------------> |             |
-|   Disco   |                  | Propiedades |
-|           | SavePropToFile() |             |
-|           | <--------------- |             |
-+-----------+                  +-------------+
-```
-
-En este caso, los métodos PropToWindow() y WindowToProp(), no tienen efecto sobre las variables asociadas, porque no se han asociado a controles.
-
 ## Detectando errores
 
-Comunmente, los errores se producen cuando se editan las variables en los frames de configuración, esto es cuando se ejecuta WindowToProp_AllFrames().
+Comunmente, los errores pueden producirse cuando se colocan valores erróneos en los controles asociados a variables, o cuando se accede a disco. Esto es, cuando se ejecuta alguno de estos métodos:
 
-Cada frame de configuración tiene una variable de cadena llamada "MsjErr", cuyo objetivo es almacenar el error producido.
+* FileToProperties 
+* PropertiesToWindow 
+* PropertiesToFile 
+* WindowToProperties 
 
-WindowToProp_AllFrames, tiene un bulce de este tipo:
+El objeto TMiConfigINI tiene un campo de cadena, llamado "MsjErr", cuyo objetivo es almacenar el error producido en la última operación.
 
-```
-  for f in ListOfFrames(form) do begin
-    f.WindowToProp;
-    if f.MsjErr<>'' then exit(f);
-  end;
-```
-
-Lo que significa que cuando un error es detectado, se detiene el proceso y se devuelve una referencia el frame problemático.
-
-Para detectar este error, se debe incluir una rutina de verificación en el formulario de configuración, cuando se llama a WindowToProp_AllFrames().
-
-Esta rutna puede tener la siguiente forma:
+Así, es común usar el siguiente código en el evento OnClick, del botón ACEPTAR de las ventanas de configuración:
 
 ```
-procedure TConfig.BtnApplyClick(Sender: TObject);
+procedure TConfig.BitAceptarClick(Sender: TObject);
 begin
-  fraError := WindowToProp_AllFrames(self);
-  if fraError<>nil then begin
-    showmessage(fraError.MsjErr);
+  iniFile.WindowToProperties;
+  if iniFile.MsjErr<>'' then begin
+    MsgErr(iniFile.MsjErr);
     exit;
   end;
-  SavePropToFile_AllFrames(self, arINI);
+  self.Close;
 end;
 ```
+## Dependencias
 
-## Normas de diseño
+Esta librería requiere de la librería MisUtils: https://github.com/t-edson/MisUtils
 
-ConfigFrame, puede ser visto también, como un sencillo marco de trabajo (framework), porque define alguna reglas para la creación de ventanas de configuración:
-
-* Se usará un solo archivo INI y una sola ventana de configuración. Aunque se podría manejar diversos archivos de configuración, se recomienda mantener la relación:  Archivo INI <-> Ventana de configuración.
-
-* Una ventana de configuración puede manejar uno o más Frames, a los que se les llamará Frame de Configuración. Cuando se manejen más de uno, se puede usar un control de  lista o pestañas para elegir con que Frame(s) trabajar.
-
-* Los frame de configuración se deben crear y destruir dinámicamente en el formulario de configuración.
-
-* Cada Frame de configuración agrupa a un conjunto de propiedades que tengan relación entre sí. Por ejemplo, se puede tener un Frame para las propiedades generales, uno para las propiedades del editor, ... etc.
-
-* Los Frames se crean normalmente con el editor visual de Lazarus, colocando los controles necesarios para manejar a las propiedades que se usan en ese Frame.
- 
-* Los Frames de configuración se deben crear como componente heredado de "CfgFrame", para que puedan funcionar como Frames configuración.
-
-Para los nombres de objetos, se recomienda las siguientes normas:
-
-* Las unidades donde se definen los frame de configuración deben llamarse frameCfg{XXX}. Donde {XXX} es la parte del nombre que define la función. Por ejemplo frameCfgColores, frameCfgMainEdit
-
-* La unidad donde se define al formulario  de configuración (en donde se incluirán los frames de configuración), se llamará FormConfig, y el formulario se debe llamar Config.
-
-* Los frame de configuración creados en el formulario de configuración, se deben llamar fc{XXX}.
-
-Se pueden usar los programas de ejemplo como una plantilla de trabajo.
