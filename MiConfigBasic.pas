@@ -67,7 +67,20 @@ type
   );
 
   //Objeto de asociación variable-control
+
+  { TParElem }
+
   TParElem = class
+  private
+    function GetAsBoolean: Boolean;
+    function GetAsInteger: integer;
+    procedure SetAsBoolean(AValue: Boolean);
+    procedure SetAsInteger(AValue: integer);
+    function GetAsDouble: double;
+    procedure SetAsDouble(AValue: double);
+    function GetAsString: string;
+    procedure SetAsString(AValue: string);
+  public
     pVar: pointer;     //referencia a la variable
     lVar: integer;     //tamaño de variable. (Cuando no sea conocido)
     pCtl: TComponent;  //referencia al control
@@ -86,6 +99,11 @@ type
     defStr: string;    //valor string por defecto al leer de archivo INI
     defBol: boolean;   //valor booleano por defecto al leer de archivo INI
     defCol: TColor;    //valor TColor por defecto al leer de archivo INI
+  public  //propiedades para facilitar el acceso a pVar^, usando diversos tipos
+    property AsInteger: integer read GetAsInteger write SetAsInteger;
+    property AsDouble: double read GetAsDouble write SetAsDouble;
+    property AsString: string read GetAsString write SetAsString;
+    property AsBoolean: Boolean read GetAsBoolean write SetAsBoolean;
   end;
   TParElem_list = specialize TFPGObjectList<TParElem>;
 
@@ -150,6 +168,41 @@ type
 
 implementation
 
+{ TParElem }
+function TParElem.GetAsInteger: integer;
+begin
+  Result := Integer(Pvar^);
+end;
+procedure TParElem.SetAsInteger(AValue: integer);
+begin
+  //if FAsInteger=AValue then Exit;
+  Integer(Pvar^) := AValue;
+end;
+function TParElem.GetAsDouble: double;
+begin
+  Result := Double(Pvar^);
+end;
+procedure TParElem.SetAsDouble(AValue: double);
+begin
+  Double(Pvar^) := AValue;
+end;
+function TParElem.GetAsString: string;
+begin
+  Result := string(Pvar^);
+end;
+procedure TParElem.SetAsString(AValue: string);
+begin
+  string(Pvar^) := AValue;
+end;
+function TParElem.GetAsBoolean: Boolean;
+begin
+  Result := boolean(Pvar^);
+end;
+procedure TParElem.SetAsBoolean(AValue: Boolean);
+begin
+  boolean(Pvar^) := AValue;
+end;
+{ TMiConfigBasic }
 procedure TMiConfigBasic.PropertyWindow(r: TParElem; PropToWindow: boolean);
 {Implementa el movimiento de datos entre las propiedades y los controles de la ventana
 Permite leer o escribir una propiedad, desde o hacia un comtrol}

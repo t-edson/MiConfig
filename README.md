@@ -84,7 +84,7 @@ El siguiente diagrama muestra el flujo de información, y los métodos que permi
 
 De acuerdo al formato de archivo a manejar, se deberá usar la unidad TMiConfigINI o TMiConfigXML. 
 
-Para empezar a trabajar, se debe crear una instancia del objeto TMiConfigINI (o TMiConfigXML, si se quiere trabajar con XML). También se puede usar el objeto "iniFile" (o "xmlFIle") que se crea por defecto con la unidad.
+Para empezar a trabajar, se debe crear una instancia del objeto TMiConfigINI (o TMiConfigXML, si se quiere trabajar con XML). También se puede usar el objeto "cfgFile" que se crea por defecto con la unidad.
 
 Luego se deben crear asociaciones de las variables a guardar, y los controles que permitirán modificar estas variables. Para ello, existen un conjunto de métodos que permiten realizar estas asociaciones:
 

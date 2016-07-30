@@ -28,12 +28,11 @@ type
   {Clase base que es usada para manejar los campos de configuración.}
   TMiConfigINI = class(TMiConfigBasic)
   private
-    INIfile    : string;   //archivo XML
+    fileName    : string;   //archivo XML
     function DefaultFileName: string;
     procedure FileProperty(iniCfg: TIniFile; const r: TParElem; FileToProp: boolean);
   public
     secINI: string;   //sección donde se guardarán los datos en un archivo INI
-    property FileName: string read INIfile write INIfile;
     procedure VerifyFile;
     function FileToProperties: boolean; virtual;
     function PropertiesToFile: boolean; virtual;
@@ -43,7 +42,7 @@ type
   end;
 
 var
-  iniFile : TMiConfigINI;   //Default INI Config file
+  cfgFile : TMiConfigINI;   //Default INI Config file
 
 implementation
 //Funciones de uso interno
@@ -86,44 +85,37 @@ procedure TMiConfigINI.FileProperty(iniCfg: TIniFile; const r: TParElem; FileToP
 {Permite leer o escribir una propiedad en el archivo XML}
 var
   n, j: Integer;
-  d: Double;
-  s: String;
   list: TStringList;
   strlst: TStringList;
-  b: Boolean;
   c: TColor;
 begin
   case r.tipPar of
   tp_Int, tp_Int_TEdit, tp_Int_TSpinEdit:
     if FileToProp then begin  //lee entero
-       Integer(r.Pvar^) := iniCfg.ReadInteger(secINI, r.etiqVar, r.defEnt);
+      r.AsInteger := iniCfg.ReadInteger(secINI, r.etiqVar, r.defEnt);
     end else begin
-      n := Integer(r.Pvar^);
-      iniCfg.WriteInteger(secINI, r.etiqVar, n);
+      iniCfg.WriteInteger(secINI, r.etiqVar, r.AsInteger);
     end;
   //---------------------------------------------------------------------
   tp_Dbl, tp_Dbl_TEdit, tp_Dbl_TFloatSpinEdit:
     if FileToProp then begin
-       Double(r.pVar^) := iniCfg.ReadFloat(secINI, r.etiqVar, r.defDbl);
+      r.AsDouble := iniCfg.ReadFloat(secINI, r.etiqVar, r.defDbl);
     end else begin
-      d := Double(r.Pvar^);
-      iniCfg.WriteFloat(secINI, r.etiqVar, d);
+      iniCfg.WriteFloat(secINI, r.etiqVar, r.AsDouble);
     end;
   //---------------------------------------------------------------------
   tp_Str, tp_Str_TEdit, tp_Str_TEditButton, tp_Str_TCmbBox:
     if FileToProp then begin  //lee cadena
-       String(r.Pvar^) := DecodeStr(iniCfg.ReadString(secINI, r.etiqVar, '.'+r.defStr+'.'));
+      r.AsString := DecodeStr(iniCfg.ReadString(secINI, r.etiqVar, '.'+r.defStr+'.'));
     end else begin
-      s := String(r.Pvar^);
-      iniCfg.WriteString(secINI, r.etiqVar,CodeStr(s));
+      iniCfg.WriteString(secINI, r.etiqVar, CodeStr(r.AsString));
     end;
   //---------------------------------------------------------------------
   tp_Bol, tp_Bol_TCheckBox, tp_Bol_TRadBut:
     if FileToProp then begin  //lee booleano
-      boolean(r.Pvar^) := iniCfg.ReadBool(secINI, r.etiqVar, r.defBol);
+      r.AsBoolean := iniCfg.ReadBool(secINI, r.etiqVar, r.defBol);
     end else begin
-      b := boolean(r.Pvar^);
-      iniCfg.WriteBool(secINI, r.etiqVar, b);
+      iniCfg.WriteBool(secINI, r.etiqVar, r.AsBoolean);
     end;
   //---------------------------------------------------------------------
   tp_Enum, tp_Enum_TRadBut, tp_Enum_TRadGroup:
@@ -146,12 +138,12 @@ begin
   //---------------------------------------------------------------------
   tp_TCol_TColBut:
     if FileToProp then begin  //lee TColor
-       TColor(r.Pvar^) := iniCfg.ReadInteger(secINI, r.etiqVar, r.defCol);
+      TColor(r.Pvar^) := iniCfg.ReadInteger(secINI, r.etiqVar, r.defCol);
     end else begin
       c := Tcolor(r.Pvar^);
       iniCfg.WriteInteger(secINI, r.etiqVar, c);
     end;
-  tp_StrList:
+  tp_StrList, tp_StrList_TListBox:
     if FileToProp then  begin //lee TStringList
       list := TStringList(r.Pvar^);
       iniCfg.ReadSection(secINI+'_'+r.etiqVar, list);
@@ -164,20 +156,6 @@ begin
         iniCfg.WriteString(secINI+'_'+r.etiqVar,
                            CodeStr(strlst[j]),'');
       end;
-    end;
-  tp_StrList_TListBox:
-    if FileToProp then begin //lee TStringList
-       list := TStringList(r.Pvar^);
-       iniCfg.ReadSection(secINI+'_'+r.etiqVar, list);
-       //decodifica cadena
-       for n:=0 to list.Count-1 do list[n] := DecodeStr(list[n]);
-    end else begin
-       strlst := TStringList(r.Pvar^);
-       iniCfg.EraseSection(secINI+'_'+r.etiqVar);
-       for j:= 0 to strlst.Count-1 do begin
-         iniCfg.WriteString(secINI+'_'+r.etiqVar,
-                            CodeStr(strlst[j]),'');
-       end;
     end;
   else  //no se ha implementado bien
     msjErr := dic('Design error.');
@@ -241,7 +219,7 @@ end;
 constructor TMiConfigINI.Create(INIfile0: string);
 begin
   inherited Create;
-  INIfile := INIfile0;
+  fileName := INIfile0;
   secINI := 'config';  //sección por defecto en archivo INI
 end;
 destructor TMiConfigINI.Destroy;
@@ -250,9 +228,9 @@ begin
 end;
 
 initialization
-  iniFile := TMiConfigINI.Create(iniFile.DefaultFileName);
+  cfgFile := TMiConfigINI.Create(cfgFile.DefaultFileName);
 
 finalization
-  iniFile.Destroy;
+  cfgFile.Destroy;
 end.
 

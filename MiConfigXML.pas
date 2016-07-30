@@ -10,8 +10,8 @@ fácilmente, una ventana de configuración, con las opciones: ACEPTAR y CANCELAR
 Es similar a MiConfigXML, pero trabaja con archivos XML.
 
 Para alamacenar las propiedades, se debe crear un objeto TMiConfigINI. Sin embargo,
-la unidad crea por defecto, una isntancia de TMiConfigINI, llamada "xmlFile", que toma
-como nombre <nombre del proyecto.ini>
+la unidad crea por defecto, una isntancia de TMiConfigINI, llamada "cfgFile", que toma
+como nombre <nombre del proyecto.xml>
 Tiene como dependencia a la librería MisUtils.
 
 Por Tito Hinostroza 29/07/2016
@@ -20,20 +20,17 @@ unit MiConfigXML;
 {$mode objfpc}{$H+}
 interface
 uses
-  Classes, SysUtils, Graphics, Forms, Laz2_XMLCfg, MisUtils,
-  MiConfigBasic;
-
+  Classes, SysUtils, Graphics, Forms, Laz2_XMLCfg, MisUtils, MiConfigBasic;
 type
   { TMiConfigXML }
   {Clase base que es usada para manEjar lso campos de configuración.}
   TMiConfigXML = class(TMiConfigBasic)
   private
-    XMLfile    : string;   //archivo XML
+    fileName    : string;   //archivo XML
     function DefaultFileName: string;
     procedure FileProperty(xmlCfg: TXMLConfig; const r: TParElem; FileToProp: boolean);
   public
     secINI: string;   //sección donde se guardarán los datos en un archivo INI
-    property FileName: string read XMLfile write XMLfile;
     procedure VerifyFile;
     function FileToProperties: boolean; virtual;
     function PropertiesToFile: boolean; virtual;
@@ -43,7 +40,7 @@ type
   end;
 
 var
-  xmlFile : TMiConfigXML;   //Default XML Config file
+  cfgFile : TMiConfigXML;   //Default XML Config file
 
 implementation
 
@@ -60,10 +57,10 @@ procedure TMiConfigXML.VerifyFile;
 var
   F: textfile;
 begin
-  if not FileExists(FileName) then begin
-    MsgErr('No XML file found: %s', [FileName]);
+  if not FileExists(fileName) then begin
+    MsgErr('No XML file found: %s', [fileName]);
     //crea uno vacío para leer las opciones por defecto
-    AssignFile(F, FileName);
+    AssignFile(F, fileName);
     Rewrite(F);
     writeln(F, '<?xml version="1.0" encoding="utf-8"?>');
     writeln(F, '<CONFIG>');
@@ -75,106 +72,76 @@ procedure TMiConfigXML.FileProperty(xmlCfg: TXMLConfig; const r: TParElem; FileT
 {Permite leer o escribir una propiedad en el archivo XML}
 var
   n: Integer;
-  s: String;
+  s, defStr: String;
+  c: TColor;
+  list: TStringList;
 begin
   case r.tipPar of
-  tp_Int_TEdit:
+  tp_Int, tp_Int_TEdit, tp_Int_TSpinEdit:
     if FileToProp then begin  //lee entero
-      //Integer(r.Pvar^) := arcINI.ReadInteger(secINI, r.etiqVar, r.defEnt);
-      Integer(r.Pvar^) := xmlCfg.GetValue(r.etiqVar + '/Val', r.defEnt)
-    end else begin  //escribe entero
-      n := Integer(r.Pvar^);
-//      arcINI.WriteInteger(secINI, r.etiqVar, n);
-      xmlCfg.SetValue(r.etiqVar + '/Val', n) ;
+      r.AsInteger := xmlCfg.GetValue(r.etiqVar + '/Val', r.defEnt)
+    end else begin
+      xmlCfg.SetValue(r.etiqVar + '/Val', r.AsInteger) ;
     end;
-{    tp_Int_TSpinEdit: begin //escribe entero
-       n := Integer(r.Pvar^);
-       arcINI.WriteInteger(secINI, r.etiqVar, n);
-     end;
-  tp_Dbl_TEdit: begin  //escribe double
-       d := Double(r.Pvar^);
-       arcINI.WriteFloat(secINI, r.etiqVar, d);
-  end;
-  tp_Dbl_TFloatSpinEdit: begin
-       d := Double(r.Pvar^);
-       arcINI.WriteFloat(secINI, r.etiqVar, d);
-  end;
-}
-  tp_Str_TEdit:
-    if FileToProp then begin  //lee
-//      string(r.Pvar^) := DecodeStr(arcINI.ReadString(secINI, r.etiqVar, '.'+r.defStr+'.'));
-      string(r.Pvar^) := xmlCfg.GetValue(r.etiqVar + '/Val', r.defStr);
-    end else begin //escribe cadena
-      s := String(r.Pvar^);
-//         arcINI.WriteString(secINI, r.etiqVar,CodeStr(s));
+  //---------------------------------------------------------------------
+  tp_Dbl, tp_Dbl_TEdit, tp_Dbl_TFloatSpinEdit:
+    //No hay métodos para leer/escribir números flotantes. Se usarán cadena
+    if FileToProp then begin
+      defStr := FloatToStr(r.defDbl);
+      s := xmlCfg.GetValue(r.etiqVar + '/Val', defStr);  //lee como cadena
+      r.AsDouble := StrToFloat(s);
+    end else begin
+      s := FloatToStr(r.AsDouble);
       xmlCfg.SetValue(r.etiqVar + '/Val', s) ;
     end;
-{    tp_Str_TEditButton: begin //escribe cadena
-       s := String(r.Pvar^);
-       arcINI.WriteString(secINI, r.etiqVar,CodeStr(s));
-     end;
-  tp_Str_TCmbBox: begin //escribe cadena
-       s := String(r.Pvar^);
-       arcINI.WriteString(secINI, r.etiqVar,CodeStr(s));
-     end;
-  tp_StrList_TListBox: begin  //escribe TStringList
-        strlst := TStringList(r.Pvar^);
-        arcINI.EraseSection(secINI+'_'+r.etiqVar);
-        for j:= 0 to strlst.Count-1 do begin
-          arcINI.WriteString(secINI+'_'+r.etiqVar,
-                             CodeStr(strlst[j]),'');
-        end;
-     end;
-  tp_Bol_TCheckBox: begin  //escribe booleano
-       b := boolean(r.Pvar^);
-       arcINI.WriteBool(secINI, r.etiqVar, b);
-     end;
-  tp_TCol_TColBut: begin  //escribe TColor
-       c := Tcolor(r.Pvar^);
-       arcINI.WriteInteger(secINI, r.etiqVar, c);
-     end;
-  tp_Enum_TRadBut: begin  //escribe enumerado
-     if r.lVar = 4 then begin
-       n := Int32(r.Pvar^);   //lo guarda como entero
-       arcINI.WriteInteger(secINI, r.etiqVar, n);
-     end else begin  //tamaño no implementado
-       msjErr := dic('Enumerated type no handled.');
-       exit;
-     end;
-  end;
-  tp_Enum_TRadGroup: begin  //escribe enumerado
-     if r.lVar = 4 then begin
-       n := Int32(r.Pvar^);   //lo guarda como entero
-       arcINI.WriteInteger(secINI, r.etiqVar, n);
-     end else begin  //tamaño no implementado
-       msjErr := dic('Enumerated type no handled.');
-       exit;
-     end;
-  end;
-  tp_Bol_TRadBut: begin  //escribe booleano
-       b := boolean(r.Pvar^);
-       arcINI.WriteBool(secINI, r.etiqVar, b);
-     end;
-  tp_Int: begin //escribe entero
-       n := Integer(r.Pvar^);
-       arcINI.WriteInteger(secINI, r.etiqVar, n);
-     end;
-  tp_Bol: begin  //escribe booleano
-       b := boolean(r.Pvar^);
-       arcINI.WriteBool(secINI, r.etiqVar, b);
-     end;
-  tp_Str: begin //escribe cadena
-       s := String(r.Pvar^);
-       arcINI.WriteString(secINI, r.etiqVar,CodeStr(s));
-     end;
-  tp_StrList: begin  //escribe TStringList
-        strlst := TStringList(r.Pvar^);
-        arcINI.EraseSection(secINI+'_'+r.etiqVar);
-        for j:= 0 to strlst.Count-1 do begin
-          arcINI.WriteString(secINI+'_'+r.etiqVar,
-                             CodeStr(strlst[j]),'');
-        end;
-     end;}
+  //---------------------------------------------------------------------
+  tp_Str, tp_Str_TEdit, tp_Str_TEditButton, tp_Str_TCmbBox:
+    if FileToProp then begin  //lee cadena
+      r.AsString := xmlCfg.GetValue(r.etiqVar + '/Val', r.defStr);
+    end else begin
+      xmlCfg.SetValue(r.etiqVar + '/Val', r.AsString) ;
+    end;
+  //---------------------------------------------------------------------
+  tp_Bol, tp_Bol_TCheckBox, tp_Bol_TRadBut:
+    if FileToProp then begin  //lee booleano
+      r.AsBoolean := xmlCfg.GetValue(r.etiqVar + '/Val', r.defBol);
+    end else begin
+      xmlCfg.SetValue(r.etiqVar + '/Val', r.AsBoolean);
+    end;
+  //---------------------------------------------------------------------
+  tp_Enum, tp_Enum_TRadBut, tp_Enum_TRadGroup:
+    if FileToProp then begin  //lee enumerado como entero
+       if r.lVar = 4 then begin  //tamaño común de las variable enumeradas
+         Int32(r.Pvar^) := xmlCfg.GetValue(r.etiqVar + '/Val', r.defEnt);
+       end else begin  //tamaño no implementado
+         msjErr := dic('Enumerated type no handled.');
+         exit;
+       end;
+    end else begin
+      if r.lVar = 4 then begin
+        n := Int32(r.Pvar^);   //lo guarda como entero
+        xmlCfg.SetValue(r.etiqVar + '/Val', n) ;
+      end else begin  //tamaño no implementado
+        msjErr := dic('Enumerated type no handled.');
+        exit;
+      end;
+    end;
+  //---------------------------------------------------------------------
+  tp_TCol_TColBut:
+    if FileToProp then begin  //lee TColor
+      TColor(r.Pvar^) := xmlCfg.GetValue(r.etiqVar + '/Val',  r.defCol);  //lee como entero
+    end else begin
+      c := Tcolor(r.Pvar^);
+      xmlCfg.SetValue(r.etiqVar + '/Val', c) ;  //escribe como entero
+    end;
+  tp_StrList, tp_StrList_TListBox:
+    if FileToProp then  begin //lee TStringList
+      list := TStringList(r.Pvar^);
+      list.Text := xmlCfg.GetValue(r.etiqVar + '/Val', '');  //lee como texto
+    end else begin
+      list := TStringList(r.Pvar^);
+      xmlCfg.SetValue(r.etiqVar + '/Val', list.Text);  //escribe como texto
+    end;
   else  //no se ha implementado bien
     msjErr := dic('Design error.');
     exit;
@@ -196,7 +163,7 @@ begin
   MsjErr := dic('Error reading INI file: %s', [fileName]);
   try
     xmlCfg := TXMLConfig.Create(nil);
-    xmlCfg.Filename := XMLfile;  //lee archivo XML
+    xmlCfg.Filename := fileName;  //lee archivo XML
     for r in listParElem do begin
       FileProperty(xmlCfg, r, true);
     end;
@@ -223,7 +190,7 @@ begin
        End;
     End;
     xmlCfg := TXMLConfig.Create(nil);
-    xmlCfg.Filename := XMLfile;  //lee archivo XML
+    xmlCfg.Filename := fileName;  //lee archivo XML
     xmlCfg.Clear;
     for r in listParElem do begin
       FileProperty(xmlCfg, r, false);
@@ -239,7 +206,7 @@ end;
 constructor TMiConfigXML.Create(XMLfile0: string);
 begin
   inherited Create;
-  XMLfile := XMLfile0;
+  fileName := XMLfile0;
 end;
 destructor TMiConfigXML.Destroy;
 begin
@@ -247,9 +214,9 @@ begin
 end;
 
 initialization
-  xmlFile := TMiConfigXML.Create(xmlFile.DefaultFileName);
+  cfgFile := TMiConfigXML.Create(cfgFile.DefaultFileName);
 
 finalization
-  xmlFile.Destroy;
+  cfgFile.Destroy;
 end.
 
