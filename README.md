@@ -1,2 +1,2 @@
 # MiConfig
-Library to create Configuration dialogs.
+Lazarus library to create Configuration dialogs.
