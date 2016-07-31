@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <MyText Val="a2"/>
+  <MyInt Val="5"/>
+  <MyFloat Val="5.14"/>
+  <MyBool Val="False"/>
+  <MyColor Val="16777215"/>
+  <MyEnum Val="1"/>
+  <MyMultStr Val="line1
+line2"/>
+</CONFIG>
