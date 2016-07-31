@@ -10,7 +10,7 @@ fácilmente, una ventana de configuración, con las opciones: ACEPTAR y CANCELAR
 Está basado en la librería ConfigFrame, pero a diferencia de esta, aquí las propiedades
 no se separan en "frames", sino que todas las propiedades se manejan en un mismo objeto.
 Para alamacenar las propiedades, se debe crear un objeto TMiConfigINI. Sin embargo,
-la unidad crea por defecto, una isntancia de TMiConfigINI, llamada "iniFile", que toma
+la unidad crea por defecto, una isntancia de TMiConfigINI, llamada "cfgFile", que toma
 como nombre <nombre del proyecto.ini>
 Tiene como dependencia a la librería MisUtils.
 
@@ -20,9 +20,7 @@ unit MiConfigINI;
 {$mode objfpc}{$H+}
 interface
 uses
-  Classes, SysUtils, Forms, ExtCtrls, IniFiles, Dialogs,
-  Graphics, MisUtils, MiConfigBasic;
-
+  Classes, SysUtils, Graphics, Forms, IniFiles, MisUtils, MiConfigBasic;
 type
   { TMiConfigINI }
   {Clase base que es usada para manejar los campos de configuración.}

@@ -116,8 +116,8 @@ type
     procedure PropertyWindow(r: TParElem; PropToWindow: boolean);
   public  //Rutinas de movimientos entre: Controles <-> Propiedades <-> Archivo
     OnPropertiesChanges: procedure of object;
-    procedure PropertiesToWindow;
-    procedure WindowToProperties;
+    function PropertiesToWindow: boolean;
+    function WindowToProperties: boolean;
 
   protected  //Rutinas de validación
     function EditValidateInt(edit: TEdit; min: integer=MaxInt; max: integer=-MaxInt): boolean;
@@ -150,12 +150,12 @@ type
                       radButs: array of TRadioButton;  defVal: boolean): TParElem;
     //---------------------------------------------------------------------
     function Asoc_Enum(etiq: string; ptrEnum: pointer; EnumSize: integer; defVal: integer): TParElem;
-    function Asoc_Enum_TRadBut(etiq: string; ptrEnum: pointer; EnumSize: integer;
+    function Asoc_Enum(etiq: string; ptrEnum: pointer; EnumSize: integer;
                        radButs: array of TRadioButton;  defVal: integer): TParElem;
     function Asoc_Enum(etiq: string; ptrEnum: pointer; EnumSize: integer;
                        radGroup: TRadioGroup;  defVal: integer): TParElem;
     //---------------------------------------------------------------------
-    function Asoc_Col_TColBut(etiq: string; ptrInt: pointer; colBut: TColorButton;
+    function Asoc_TCol(etiq: string; ptrTCol: pointer; colBut: TColorButton;
                              defVal: TColor): TParElem;
     //---------------------------------------------------------------------
     function Asoc_StrList(etiq: string; ptrStrList: pointer): TParElem;
@@ -408,8 +408,9 @@ begin
     exit;
   end;
 end;
-procedure TMiConfigBasic.PropertiesToWindow;
+function TMiConfigBasic.PropertiesToWindow: boolean;
 //Muestra en los controles, las variables asociadas
+//Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr".}
 var
   r: TParElem;
 begin
@@ -417,8 +418,9 @@ begin
   for r in listParElem do begin
     PropertyWindow(r, true);
   end;
+  Result := (msjErr='');
 end;
-procedure TMiConfigBasic.WindowToProperties;
+function TMiConfigBasic.WindowToProperties: boolean;
 //Lee en las variables asociadas, los valores de loc controles
 var
   r: TParElem;
@@ -429,6 +431,7 @@ begin
   end;
   //Terminó con éxito. Actualiza los cambios
   if OnPropertiesChanges<>nil then OnPropertiesChanges;
+  Result := (msjErr='');
 end;
 //Rutinas de validación
 function TMiConfigBasic.EditValidateInt(edit: TEdit; min: integer; max: integer): boolean;
@@ -663,13 +666,13 @@ begin
   r := TParElem.Create;
   r.pVar   := ptrEnum;  //toma referencia
   r.lVar   := EnumSize;  //necesita el tamaño para modificarlo luego
-  r.tipPar := tp_Enum_TRadBut;  //tipo de par
+  r.tipPar := tp_Enum;  //tipo de par
   r.etiqVar:= etiq;
   r.defEnt := defVal;   //se maneja como entero
   listParElem.Add(r);
   Result := r;
 end;
-function TMiConfigBasic.Asoc_Enum_TRadBut(etiq: string; ptrEnum: pointer;
+function TMiConfigBasic.Asoc_Enum(etiq: string; ptrEnum: pointer;
   EnumSize: integer; radButs: array of TRadioButton; defVal: integer): TParElem;
 //Agrega un par variable Enumerated - Controles TRadioButton
 //Solo se permiten enumerados de hasta 32 bits de tamaño
@@ -688,22 +691,20 @@ function TMiConfigBasic.Asoc_Enum(etiq: string; ptrEnum: pointer; EnumSize: inte
   radGroup: TRadioGroup; defVal: integer): TParElem;
 //Agrega un par variable Enumerated - Control TRadioGroup
 //Solo se permiten enumerados de hasta 32 bits de tamaño
-var
-  r: TParElem;
 begin
   Result := Asoc_Enum(etiq, ptrEnum, EnumSize, defVal);
-  r.pCtl   := radGroup;  //toma referencia a control
-  r.tipPar := tp_Enum_TRadGroup;  //tipo de par
+  Result.pCtl   := radGroup;  //toma referencia a control
+  Result.tipPar := tp_Enum_TRadGroup;  //tipo de par
 end;
 //---------------------------------------------------------------------
-function TMiConfigBasic.Asoc_Col_TColBut(etiq: string; ptrInt: pointer;
+function TMiConfigBasic.Asoc_TCol(etiq: string; ptrTCol: pointer;
   colBut: TColorButton; defVal: TColor): TParElem;
 //Agrega un par variable TColor - Control TColorButton
 var
   r: TParElem;
 begin
   r := TParElem.Create;
-  r.pVar   := ptrInt;    //toma referencia
+  r.pVar   := ptrTCol;    //toma referencia
   r.pCtl   := colBut;    //toma referencia a control
   r.tipPar := tp_TCol_TColBut;  //tipo de par
   r.etiqVar:= etiq;
