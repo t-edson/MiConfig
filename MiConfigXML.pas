@@ -7,11 +7,11 @@ Descripción
 ===========
 Unidad con rutinas de lectura/escritura de propiedades en archivos XML. Permite crear
 fácilmente, una ventana de configuración, con las opciones: ACEPTAR y CANCELAR.
-Es similar a MiConfigXML, pero trabaja con archivos XML.
+Es similar a MiConfigINI, pero trabaja con archivos XML.
 
-Para alamacenar las propiedades, se debe crear un objeto TMiConfigINI. Sin embargo,
-la unidad crea por defecto, una isntancia de TMiConfigINI, llamada "cfgFile", que toma
-como nombre <nombre del proyecto.xml>
+Para alamacenar las propiedades, se debe crear un objeto TMiConfigXML. Sin embargo,
+la unidad crea por defecto, una instancia de TMiConfigXML, llamada "cfgFile", que toma
+como nombre <nombre del proyecto>.xml
 Tiene como dependencia a la librería MisUtils.
 
 Por Tito Hinostroza 29/07/2016
@@ -23,7 +23,7 @@ uses
   Classes, SysUtils, Graphics, Forms, Laz2_XMLCfg, MisUtils, MiConfigBasic;
 type
   { TMiConfigXML }
-  {Clase base que es usada para manEjar lso campos de configuración.}
+  {Clase base que es usada para manejar los campos de configuración.}
   TMiConfigXML = class(TMiConfigBasic)
   private
     fileName    : string;   //archivo XML
@@ -40,7 +40,7 @@ type
   end;
 
 var
-  cfgFile : TMiConfigXML;   //Default XML Config file
+  cfgFile: TMiConfigXML;   //Default XML Config file
 
 implementation
 
@@ -71,7 +71,6 @@ end;
 procedure TMiConfigXML.FileProperty(xmlCfg: TXMLConfig; const r: TParElem; FileToProp: boolean);
 {Permite leer o escribir una propiedad en el archivo XML}
 var
-  n: Integer;
   s, defStr: String;
   c: TColor;
   list: TStringList;
@@ -79,7 +78,7 @@ begin
   case r.tipPar of
   tp_Int, tp_Int_TEdit, tp_Int_TSpinEdit:
     if FileToProp then begin  //lee entero
-      r.AsInteger := xmlCfg.GetValue(r.etiqVar + '/Val', r.defEnt)
+      r.AsInteger := xmlCfg.GetValue(r.etiqVar + '/Val', r.defInt)
     end else begin
       xmlCfg.SetValue(r.etiqVar + '/Val', r.AsInteger) ;
     end;
@@ -112,15 +111,14 @@ begin
   tp_Enum, tp_Enum_TRadBut, tp_Enum_TRadGroup:
     if FileToProp then begin  //lee enumerado como entero
        if r.lVar = 4 then begin  //tamaño común de las variable enumeradas
-         Int32(r.Pvar^) := xmlCfg.GetValue(r.etiqVar + '/Val', r.defEnt);
+         r.AsInt32 := xmlCfg.GetValue(r.etiqVar + '/Val', r.defInt);
        end else begin  //tamaño no implementado
          msjErr := dic('Enumerated type no handled.');
          exit;
        end;
     end else begin
       if r.lVar = 4 then begin
-        n := Int32(r.Pvar^);   //lo guarda como entero
-        xmlCfg.SetValue(r.etiqVar + '/Val', n) ;
+        xmlCfg.SetValue(r.etiqVar + '/Val', r.AsInt32) ;
       end else begin  //tamaño no implementado
         msjErr := dic('Enumerated type no handled.');
         exit;
@@ -129,9 +127,9 @@ begin
   //---------------------------------------------------------------------
   tp_TCol_TColBut:
     if FileToProp then begin  //lee TColor
-      TColor(r.Pvar^) := xmlCfg.GetValue(r.etiqVar + '/Val',  r.defCol);  //lee como entero
+      r.AsTColor := xmlCfg.GetValue(r.etiqVar + '/Val',  r.defCol);  //lee como entero
     end else begin
-      c := Tcolor(r.Pvar^);
+      c := r.AsTColor;
       xmlCfg.SetValue(r.etiqVar + '/Val', c) ;  //escribe como entero
     end;
   tp_StrList, tp_StrList_TListBox:

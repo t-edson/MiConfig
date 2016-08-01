@@ -90,7 +90,7 @@ begin
   case r.tipPar of
   tp_Int, tp_Int_TEdit, tp_Int_TSpinEdit:
     if FileToProp then begin  //lee entero
-      r.AsInteger := iniCfg.ReadInteger(secINI, r.etiqVar, r.defEnt);
+      r.AsInteger := iniCfg.ReadInteger(secINI, r.etiqVar, r.defInt);
     end else begin
       iniCfg.WriteInteger(secINI, r.etiqVar, r.AsInteger);
     end;
@@ -119,15 +119,14 @@ begin
   tp_Enum, tp_Enum_TRadBut, tp_Enum_TRadGroup:
     if FileToProp then begin  //lee enumerado como entero
        if r.lVar = 4 then begin  //tamaño común de las variable enumeradas
-         Int32(r.Pvar^) := iniCfg.ReadInteger(secINI, r.etiqVar, r.defEnt);
+         r.AsInt32 := iniCfg.ReadInteger(secINI, r.etiqVar, r.defInt);
        end else begin  //tamaño no implementado
          msjErr := dic('Enumerated type no handled.');
          exit;
        end;
     end else begin
       if r.lVar = 4 then begin
-        n := Int32(r.Pvar^);   //lo guarda como entero
-        iniCfg.WriteInteger(secINI, r.etiqVar, n);
+        iniCfg.WriteInteger(secINI, r.etiqVar, r.AsInt32);  //como entero de 4 bytes
       end else begin  //tamaño no implementado
         msjErr := dic('Enumerated type no handled.');
         exit;
@@ -136,9 +135,9 @@ begin
   //---------------------------------------------------------------------
   tp_TCol_TColBut:
     if FileToProp then begin  //lee TColor
-      TColor(r.Pvar^) := iniCfg.ReadInteger(secINI, r.etiqVar, r.defCol);
+      r.AsTColor := iniCfg.ReadInteger(secINI, r.etiqVar, r.defCol);
     end else begin
-      c := Tcolor(r.Pvar^);
+      c := r.AsTColor;
       iniCfg.WriteInteger(secINI, r.etiqVar, c);
     end;
   tp_StrList, tp_StrList_TListBox:

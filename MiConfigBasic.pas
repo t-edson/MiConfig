@@ -71,7 +71,7 @@ type
   { TParElem }
 
   TParElem = class
-  private
+  private  //Getters and setters
     function GetAsBoolean: Boolean;
     function GetAsInteger: integer;
     procedure SetAsBoolean(AValue: Boolean);
@@ -80,6 +80,10 @@ type
     procedure SetAsDouble(AValue: double);
     function GetAsString: string;
     procedure SetAsString(AValue: string);
+    function GetAsInt32: Int32;
+    procedure SetAsInt32(AValue: Int32);
+    function GetAsTColor: TColor;
+    procedure SetAsTColor(AValue: TColor);
   public
     pVar: pointer;     //referencia a la variable
     lVar: integer;     //tamaño de variable. (Cuando no sea conocido)
@@ -89,21 +93,25 @@ type
     etiqVar: string;   //etiqueta usada para grabar la variable en archivo INI
     minEnt, maxEnt: integer;  //valores máximos y mínimos para variables enteras
     minDbl, maxDbl: Double;  //valores máximos y mínimos para variables Double
-    //Campos para configurar la grilla,cuando se use
+    //Campos para configurar la grilla, cuando se use
     HasHeader  : boolean;  //Si incluye encabezado
     HasFixedCol: boolean;   //Si tiene una columna fija
     ColCount   : byte;     //Cantidad de columnas para la grilla
-    //valores por defecto
-    defEnt: integer;   //valor entero por defecto al leer de archivo INI
-    defDbl: Double;    //valor double por defecto al leer de archivo INI
-    defStr: string;    //valor string por defecto al leer de archivo INI
-    defBol: boolean;   //valor booleano por defecto al leer de archivo INI
-    defCol: TColor;    //valor TColor por defecto al leer de archivo INI
+    OnPropertyToWindow: procedure of object;
+    OnWindowToProperty: procedure of object;
+  public  //valores por defecto
+    defInt: integer;   //valor entero por defecto al leer de archivo
+    defDbl: Double;    //valor double por defecto al leer de archivo
+    defStr: string;    //valor string por defecto al leer de archivo
+    defBol: boolean;   //valor booleano por defecto al leer de archivo
+    defCol: TColor;    //valor TColor por defecto al leer de archivo
   public  //propiedades para facilitar el acceso a pVar^, usando diversos tipos
     property AsInteger: integer read GetAsInteger write SetAsInteger;
     property AsDouble: double read GetAsDouble write SetAsDouble;
     property AsString: string read GetAsString write SetAsString;
     property AsBoolean: Boolean read GetAsBoolean write SetAsBoolean;
+    property AsInt32: Int32 read GetAsInt32 write SetAsInt32;
+    property AsTColor: TColor read GetAsTColor write SetAsTColor;
   end;
   TParElem_list = specialize TFPGObjectList<TParElem>;
 
@@ -116,8 +124,8 @@ type
     procedure PropertyWindow(r: TParElem; PropToWindow: boolean);
   public  //Rutinas de movimientos entre: Controles <-> Propiedades <-> Archivo
     OnPropertiesChanges: procedure of object;
-    function PropertiesToWindow: boolean;
-    function WindowToProperties: boolean;
+    function PropertiesToWindow: boolean; virtual;
+    function WindowToProperties: boolean; virtual;
 
   protected  //Rutinas de validación
     function EditValidateInt(edit: TEdit; min: integer=MaxInt; max: integer=-MaxInt): boolean;
@@ -194,6 +202,15 @@ procedure TParElem.SetAsString(AValue: string);
 begin
   string(Pvar^) := AValue;
 end;
+function TParElem.GetAsTColor: TColor;
+begin
+  Result := TColor(Pvar^);
+end;
+procedure TParElem.SetAsTColor(AValue: TColor);
+begin
+  TColor(Pvar^) := AValue;
+end;
+
 function TParElem.GetAsBoolean: Boolean;
 begin
   Result := boolean(Pvar^);
@@ -202,18 +219,23 @@ procedure TParElem.SetAsBoolean(AValue: Boolean);
 begin
   boolean(Pvar^) := AValue;
 end;
+function TParElem.GetAsInt32: Int32;
+begin
+  Result := Int32(Pvar^);
+end;
+procedure TParElem.SetAsInt32(AValue: Int32);
+begin
+  Int32(pVar^) := AValue;
+end;
+
 { TMiConfigBasic }
 procedure TMiConfigBasic.PropertyWindow(r: TParElem; PropToWindow: boolean);
 {Implementa el movimiento de datos entre las propiedades y los controles de la ventana
 Permite leer o escribir una propiedad, desde o hacia un comtrol}
 var
   n, j: Integer;
-  d: Double;
-  s: String;
-  c: TColor;
   list: TStringList;
   gr: TStringGrid;
-  b: Boolean;
   spEd: TSpinEdit;
   spFloatEd: TFloatSpinEdit;
 begin
@@ -222,90 +244,82 @@ begin
   tp_Int_TEdit:
     if PropToWindow then begin  //entero en TEdit
         //carga entero
-        n:= Integer(r.Pvar^);
-        TEdit(r.pCtl).Text:=IntToStr(n);
+        TEdit(r.pCtl).Text:=IntToStr(r.AsInteger);
     end else begin
         if not EditValidateInt(TEdit(r.pCtl),r.minEnt, r.MaxEnt) then
           exit;   //hubo error. con mensaje en "msjErr"
-        Integer(r.Pvar^) := valInt;  //guarda
+        r.AsInteger := valInt;  //guarda
     end;
   tp_Int_TSpinEdit:
     if PropToWindow then begin  //entero en TSpinEdit
-        //carga entero
-        n:= Integer(r.Pvar^);
-        TSpinEdit(r.pCtl).Value:=n;
+       //carga entero
+       TSpinEdit(r.pCtl).Value:= r.AsInteger;
     end else begin
-      spEd := TSpinEdit(r.pCtl);
-      Integer(r.Pvar^) := spEd.Value;
+       spEd := TSpinEdit(r.pCtl);
+       r.AsInteger := spEd.Value;
     end;
   //---------------------------------------------------------------------
   tp_Dbl:;
   tp_Dbl_TEdit:
     if PropToWindow then begin
         //carga double
-        d:= Double(r.Pvar^);
-        TEdit(r.pCtl).Text:=FloatToStr(d);
+        TEdit(r.pCtl).Text:=FloatToStr(r.AsDouble);
     end else begin
       if not EditValidateDbl(TEdit(r.pCtl),r.minDbl, r.MaxDbl) then
         exit;   //hubo error. con mensaje en "msjErr"
-      Double(r.Pvar^) := valDbl;  //guarda
+      r.AsDouble := valDbl;  //guarda
     end;
   tp_Dbl_TFloatSpinEdit:
     if PropToWindow then begin
         //carga double
-        d:=Double(r.pVar^);
-        TFloatSpinEdit(r.pCtl).Value:=d;
+        TFloatSpinEdit(r.pCtl).Value := r.AsDouble;
     end else begin
       spFloatEd := TFloatSpinEdit(r.pCtl);
       //las validaciones de rango las hace el mismo control
-      Double(r.pVar^) := spFloatEd.Value;
+      r.AsDouble := spFloatEd.Value;
     end;
   //---------------------------------------------------------------------
   tp_Str:; //no tiene control asociado
   tp_Str_TEdit:
     if PropToWindow then begin  //cadena en TEdit
-        //carga cadena
-        s:= String(r.Pvar^);
-        TEdit(r.pCtl).Text:=s;
+       //carga cadena
+       TEdit(r.pCtl).Text := r.AsString;
     end else begin
-      String(r.Pvar^) := TEdit(r.pCtl).Text;
+       r.AsString := TEdit(r.pCtl).Text;
     end;
   tp_Str_TEditButton:
     if PropToWindow then begin
       //carga cadena
-      s:= String(r.Pvar^);
-      TEditButton(r.pCtl).Text:=s;
+      TEditButton(r.pCtl).Text := r.AsString;
     end else begin
-      String(r.Pvar^) := TEditButton(r.pCtl).Text;
+      r.AsString := TEditButton(r.pCtl).Text;
     end;
   tp_Str_TCmbBox:
     if PropToWindow then begin  //cadena en TComboBox
-        //carga cadena
-        s:= String(r.Pvar^);
-        TComboBox(r.pCtl).Text:=s;
+       //carga cadena
+       TComboBox(r.pCtl).Text := r.AsString;
     end else begin
-      String(r.Pvar^) := TComboBox(r.pCtl).Text;
+       r.AsString := TComboBox(r.pCtl).Text;
     end;
   //---------------------------------------------------------------------
   tp_Bol:; //no tiene control asociado
   tp_Bol_TCheckBox:
     if PropToWindow then begin //boolean a TCheckBox
-        b := boolean(r.Pvar^);
-        TCheckBox(r.pCtl).Checked := b;
+       TCheckBox(r.pCtl).Checked := r.AsBoolean;
     end else begin
-      boolean(r.Pvar^) := TCheckBox(r.pCtl).Checked;
+       r.AsBoolean := TCheckBox(r.pCtl).Checked;
     end;
   tp_Bol_TRadBut:
     if PropToWindow then begin //Enumerado a TRadioButtons
-        b:= boolean(r.Pvar^);  //convierte a entero
-        if 1<=High(r.radButs) then
-          if b then r.radButs[1].checked := true  //activa primero
+        if 1<=High(r.radButs) then begin
+          if r.AsBoolean then r.radButs[1].checked := true  //activa primero
           else r.radButs[0].checked := true  //activa segundo
+        end;
     end else begin
         //busca el que está marcado
         if high(r.radButs)>=1 then begin
-           if r.radButs[1].checked then boolean(r.Pvar^) := true
-           else boolean(r.Pvar^) := false;
+           if r.radButs[1].checked then r.AsBoolean := true
+           else r.AsBoolean := false;
         end;
     end;
   //---------------------------------------------------------------------
@@ -313,7 +327,7 @@ begin
   tp_Enum_TRadBut:
     if PropToWindow then begin //Enumerado a TRadioButtons
         if r.lVar = 4 then begin  //enumerado de 4 bytes
-          n:= Int32(r.Pvar^);  //convierte a entero
+          n := r.AsInt32;  //convierte a entero
           if n<=High(r.radButs) then
             r.radButs[n].checked := true;  //lo activa
         end else begin  //tamño no implementado
@@ -326,7 +340,7 @@ begin
            if r.radButs[j].checked then begin
              //debe fijar el valor del enumerado
              if r.lVar = 4 then begin  //se puede manejar como entero
-               Int32(r.Pvar^) := j;  //guarda
+               r.AsInt32 := j;  //guarda
                break;
              end else begin  //tamaño no implementado
                msjErr := dic('Enumerated type no handled.');
@@ -338,7 +352,7 @@ begin
   tp_Enum_TRadGroup:
     if PropToWindow then begin
         if r.lVar = 4 then begin  //enumerado de 4 bytes
-          n:= Int32(r.Pvar^);  //convierte a entero
+          n := r.AsInt32;  //convierte a entero
           if n<TRadioGroup(r.pCtl).Items.Count then
             TRadioGroup(r.pCtl).ItemIndex:=n; //activa
         end else begin  //tamño no implementado
@@ -348,7 +362,7 @@ begin
     end else begin
        //debe fijar el valor del enumerado
        if r.lVar = 4 then begin  //se puede manejar como entero
-         Int32(r.Pvar^) := TRadioGroup(r.pCtl).ItemIndex;  //lee
+         r.AsInt32 := TRadioGroup(r.pCtl).ItemIndex;  //lee
        end else begin  //tamaño no implementado
          msjErr := dic('Enumerated type no handled.');
          exit;
@@ -357,10 +371,9 @@ begin
   //---------------------------------------------------------------------
   tp_TCol_TColBut:
     if PropToWindow then begin //Tcolor a TColorButton
-        c := Tcolor(r.Pvar^);
-        TColorButton(r.pCtl).ButtonColor := c;
+       TColorButton(r.pCtl).ButtonColor := r.AsTColor;
     end else begin
-      TColor(r.Pvar^) := TColorButton(r.pCtl).ButtonColor;
+       r.AsTColor := TColorButton(r.pCtl).ButtonColor;
     end;
   //---------------------------------------------------------------------
   tp_StrList:; //no tiene control asociado
@@ -417,6 +430,7 @@ begin
   msjErr := '';
   for r in listParElem do begin
     PropertyWindow(r, true);
+    if r.OnPropertyToWindow<>nil then r.OnPropertyToWindow;
   end;
   Result := (msjErr='');
 end;
@@ -428,6 +442,7 @@ begin
   msjErr := '';
   for r in listParElem do begin
     PropertyWindow(r, false);
+    if r.OnWindowToProperty<>nil then r.OnWindowToProperty;
   end;
   //Terminó con éxito. Actualiza los cambios
   if OnPropertiesChanges<>nil then OnPropertiesChanges;
@@ -520,7 +535,7 @@ end;
 //Métodos de asociación
 function TMiConfigBasic.Asoc_Int(etiq: string; ptrInt: pointer; defVal: integer
   ): TParElem;
-//Agrega una variable Entera para guardarla en el archivo INI.
+//Agrega una variable Entera para guardarla en el archivo.
 var
   r: TParElem;
 begin
@@ -528,7 +543,7 @@ begin
   r.pVar   := ptrInt;  //toma referencia
   r.tipPar := tp_Int;  //tipo de par
   r.etiqVar:= etiq;
-  r.defEnt := defVal;
+  r.defInt := defVal;
   listParElem.Add(r);
   Result := r;
 end;
@@ -584,7 +599,7 @@ end;
 //---------------------------------------------------------------------
 function TMiConfigBasic.Asoc_Str(etiq: string; ptrStr: pointer; defVal: string
   ): TParElem;
-//Agrega una variable String para guardarla en el archivo INI.
+//Agrega una variable String para guardarla en el archivo.
 var
   r: TParElem;
 begin
@@ -668,7 +683,7 @@ begin
   r.lVar   := EnumSize;  //necesita el tamaño para modificarlo luego
   r.tipPar := tp_Enum;  //tipo de par
   r.etiqVar:= etiq;
-  r.defEnt := defVal;   //se maneja como entero
+  r.defInt := defVal;   //se maneja como entero
   listParElem.Add(r);
   Result := r;
 end;
@@ -715,7 +730,7 @@ end;
 //---------------------------------------------------------------------
 function TMiConfigBasic.Asoc_StrList(etiq: string; ptrStrList: pointer
   ): TParElem;
-//Agrega una variable TStringList para guardarla en el archivo INI. El StrinList, debe estar
+//Agrega una variable TStringList para guardarla en el archivo. El StrinList, debe estar
 //ya creado, sino dará error.
 var
   r: TParElem;
