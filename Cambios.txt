@@ -1,0 +1,9 @@
+Cambios en la versión 0.3
+=========================
+
+Se incluyeron los eventos:
+  TParElem.OnFileToProperty
+  TParElem.OnPropertyToFile
+y el código de disparo.
+
+Se incluye protecciones, para cuando se indica direciones NIL en "pVar".

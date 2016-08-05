@@ -87,6 +87,7 @@ var
   strlst: TStringList;
   c: TColor;
 begin
+  if r.pVar = nil then exit;   //se inició con NIL
   case r.tipPar of
   tp_Int, tp_Int_TEdit, tp_Int_TSpinEdit:
     if FileToProp then begin  //lee entero
@@ -177,6 +178,7 @@ begin
     iniCfg := TIniFile.Create(fileName);
     for r in listParElem do begin
       FileProperty(iniCfg, r, true);
+      if r.OnFileToProperty<>nil then r.OnFileToProperty;
     end;
     //Terminó con éxito. Actualiza los cambios
     if OnPropertiesChanges<>nil then OnPropertiesChanges;
@@ -204,6 +206,7 @@ begin
     End;
     iniCfg := TIniFile.Create(fileName);
     for r in listParElem do begin
+      if r.OnPropertyToFile<>nil then r.OnPropertyToFile;  //se ejecuta antes
       FileProperty(iniCfg, r, false);
     end;
     Result := true;  //sin error

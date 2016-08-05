@@ -75,6 +75,7 @@ var
   c: TColor;
   list: TStringList;
 begin
+  if r.pVar = nil then exit;   //se inició con NIL
   case r.tipPar of
   tp_Int, tp_Int_TEdit, tp_Int_TSpinEdit:
     if FileToProp then begin  //lee entero
@@ -164,6 +165,7 @@ begin
     xmlCfg.Filename := fileName;  //lee archivo XML
     for r in listParElem do begin
       FileProperty(xmlCfg, r, true);
+      if r.OnFileToProperty<>nil then r.OnFileToProperty;
     end;
     Result := true;  //sin error
     MsjErr := '';    //sin error
@@ -191,6 +193,7 @@ begin
     xmlCfg.Filename := fileName;  //lee archivo XML
     xmlCfg.Clear;
     for r in listParElem do begin
+      if r.OnPropertyToFile<>nil then r.OnPropertyToFile;  //se ejecuta antes
       FileProperty(xmlCfg, r, false);
     end;
     xmlCfg.Flush;

@@ -99,6 +99,8 @@ type
     ColCount   : byte;     //Cantidad de columnas para la grilla
     OnPropertyToWindow: procedure of object;
     OnWindowToProperty: procedure of object;
+    OnFileToProperty: procedure of object;   //después de guardar el elemento a disco
+    OnPropertyToFile: procedure of object;   //antes de guardar el elemento a disco
   public  //valores por defecto
     defInt: integer;   //valor entero por defecto al leer de archivo
     defDbl: Double;    //valor double por defecto al leer de archivo
@@ -239,6 +241,7 @@ var
   spEd: TSpinEdit;
   spFloatEd: TFloatSpinEdit;
 begin
+  if r.pVar = nil then exit;   //se inició con NIL
   case r.tipPar of
   tp_Int:; //no tiene control asociado
   tp_Int_TEdit:
