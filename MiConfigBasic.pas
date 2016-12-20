@@ -171,7 +171,8 @@ type
     function Asoc_StrList(etiq: string; ptrStrList: pointer): TParElem;
     function Asoc_StrList_TListBox(etiq: string; ptrStrList: pointer; lstBox: TlistBox): TParElem;
   public
-    MsjErr: string;   //mensaje de error
+    MsjErr: string;    //mensaje de error
+    ctlErr: TParElem;  //elemento con error
     constructor Create;
     destructor Destroy; override;
   end;
@@ -425,31 +426,40 @@ begin
   end;
 end;
 function TMiConfigBasic.PropertiesToWindow: boolean;
-//Muestra en los controles, las variables asociadas
-//Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr".}
+{Muestra en los controles, las variables asociadas
+Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr", y el elemento
+con error en "ctlErr".}
 var
   r: TParElem;
 begin
   msjErr := '';
   for r in listParElem do begin
     PropertyWindow(r, true);
+    if msjErr<>'' then begin
+      ctlErr := r;  //guarda la referencia al elemento, en caso de que haya error
+    end;
     if r.OnPropertyToWindow<>nil then r.OnPropertyToWindow;
   end;
   Result := (msjErr='');
 end;
 function TMiConfigBasic.WindowToProperties: boolean;
-//Lee en las variables asociadas, los valores de loc controles
+{Lee en las variables asociadas, los valores de loc controles
+Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr", y el elemento
+con error en "ctlErr".}
 var
   r: TParElem;
 begin
   msjErr := '';
   for r in listParElem do begin
     PropertyWindow(r, false);
+    if msjErr<>'' then begin
+      ctlErr := r;  //guarda la referencia al elemento, en caso de que haya error
+    end;
     if r.OnWindowToProperty<>nil then r.OnWindowToProperty;
   end;
   //Terminó con éxito. Actualiza los cambios
   if OnPropertiesChanges<>nil then OnPropertiesChanges;
-  Result := (msjErr='');
+  Result := (msjErr='');  //si hubo error, se habrá actualizado "ctlErr"
 end;
 //Rutinas de validación
 function TMiConfigBasic.EditValidateInt(edit: TEdit; min: integer; max: integer): boolean;

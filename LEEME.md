@@ -38,18 +38,18 @@ implementation
 procedure TConfig.Initiate;
 begin
   //asociate vars to controls
-  iniFile.Asoc_Str('MyText', @MyText, Edit1, '');
-  iniFile.FileToProperties;
+  cfgFile.Asoc_Str('MyText', @MyText, Edit1, '');
+  cfgFile.FileToProperties;
 end;
 
 procedure TConfig.FormShow(Sender: TObject);
 begin
-  iniFile.PropertiesToWindow;
+  cfgFile.PropertiesToWindow;
 end;
 
 procedure TConfig.BitAceptarClick(Sender: TObject);
 begin
-  iniFile.WindowToProperties;
+  cfgFile.WindowToProperties;
   self.Close;
 end;
 
@@ -84,7 +84,9 @@ El siguiente diagrama muestra el flujo de información, y los métodos que permi
 
 De acuerdo al formato de archivo a manejar, se deberá usar la unidad TMiConfigINI o TMiConfigXML. 
 
-Para empezar a trabajar, se debe crear una instancia del objeto TMiConfigINI (o TMiConfigXML, si se quiere trabajar con XML). También se puede usar el objeto "cfgFile" que se crea por defecto con la unidad.
+Para empezar a trabajar, se debe crear una instancia del objeto TMiConfigINI (o TMiConfigXML, si se quiere trabajar con XML). 
+
+También se puede usar el objeto "cfgFile" que se crea por defecto con la unidad, de modo que no es necesario crearlo. El objeto "cfgFile" define para el archivo de configuración, el nombre: <nombre del proyecto>.xml o  <nombre del proyecto>.ini
 
 Luego se deben crear asociaciones de las variables a guardar, y los controles que permitirán modificar estas variables. Para ello, existen un conjunto de métodos que permiten realizar estas asociaciones:
 
@@ -157,9 +159,9 @@ Así, es común usar el siguiente código en el evento OnClick, del botón ACEPT
 ```
 procedure TConfig.BitAceptarClick(Sender: TObject);
 begin
-  iniFile.WindowToProperties;
-  if iniFile.MsjErr<>'' then begin
-    MsgErr(iniFile.MsjErr);
+  cfgFile.WindowToProperties;
+  if cfgFile.MsjErr<>'' then begin
+    MsgErr(cfgFile.MsjErr);
     exit;
   end;
   self.Close;

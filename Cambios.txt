@@ -7,3 +7,8 @@ Se incluyeron los eventos:
 y el código de disparo.
 
 Se incluye protecciones, para cuando se indica direciones NIL en "pVar".
+Se corrige errores menores de mensajes.
+Se crea la unidad MiConfigUtils, para incluir rutinas que ayuden en el uso de Frames
+y controles TTreeNode en los formularios de configuración.
+Se crea el campo TMiConfigBasic.ctlErr, para devolver la referencia al control que generó
+error.

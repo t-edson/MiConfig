@@ -1,6 +1,6 @@
 {
-MiConfigXml 0.1b
-=============
+MiConfigXml
+===========
 Por Tito Hinostroza 29/07/2016
 
 Descripción
@@ -48,7 +48,7 @@ implementation
 
 { TMiConfigXML }
 function TMiConfigXML.DefaultFileName: string;
-{Devuelve el nombre pro defecto del archvio de configuración}
+{Devuelve el nombre por defecto del archvio de configuración}
 begin
   Result := ChangeFileExt(Application.ExeName,'.xml');
 end;
@@ -148,7 +148,8 @@ begin
 end;
 function TMiConfigXML.FileToProperties: boolean;
 {Lee de disco las propiedades registradas
-Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr".}
+Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr", y el elemento
+con error en "ctlErr".}
 var
   r: TParElem;
   xmlCfg: TXMLConfig;
@@ -163,8 +164,13 @@ begin
   try
     xmlCfg := TXMLConfig.Create(nil);
     xmlCfg.Filename := fileName;  //lee archivo XML
+    msjErr := '';
     for r in listParElem do begin
       FileProperty(xmlCfg, r, true);
+      if msjErr<>'' then begin
+        ctlErr := r;  //elemento que produjo el error
+        exit(false);   //sale con error y destruyendo xmlCfg en el FINALLY
+      end;
       if r.OnFileToProperty<>nil then r.OnFileToProperty;
     end;
     Result := true;  //sin error
@@ -180,28 +186,36 @@ var
   r: TParElem;
   xmlCfg: TXMLConfig;
 begin
-  Result := false;
-  MsjErr := dic('Error writing INI file: %s', [fileName]);
+  if FileExists(fileName) then begin  //ve si existe
+     if FileIsReadOnly(fileName) then begin
+       ctlErr := nil;
+       MsjErr := dic('XML file is only read.');
+       exit(false);
+     end;
+  end;
   try
-    If FileExists(fileName)  Then  begin  //ve si existe
-       If FileIsReadOnly(fileName) Then begin
-          MsjErr := dic('INI file is only read.');
-          exit(false);
-       End;
-    End;
     xmlCfg := TXMLConfig.Create(nil);
     xmlCfg.Filename := fileName;  //lee archivo XML
     xmlCfg.Clear;
-    for r in listParElem do begin
-      if r.OnPropertyToFile<>nil then r.OnPropertyToFile;  //se ejecuta antes
-      FileProperty(xmlCfg, r, false);
-    end;
-    xmlCfg.Flush;
-    Result := true;  //sin error
-    MsjErr := '';    //sin error
-  finally
-    xmlCfg.Destroy;
+  except
+    ctlErr := nil;
+    MsjErr := dic('Error writing XML file: %s', [fileName]);
+    exit(false);
   end;
+  msjErr := '';
+  for r in listParElem do begin
+    if r.OnPropertyToFile<>nil then r.OnPropertyToFile;  //se ejecuta antes
+    FileProperty(xmlCfg, r, false);
+    if msjErr<>'' then begin
+      ctlErr := r;   //elemento que produjo el error
+      xmlCfg.Free;   //libera
+      exit(false);   //sale con error
+    end;
+  end;
+  xmlCfg.Flush;
+  ctlErr := nil;
+  xmlCfg.Free;
+  exit(true);     //sin error
 end;
 //Constructor y Destructor
 constructor TMiConfigXML.Create(XMLfile0: string);

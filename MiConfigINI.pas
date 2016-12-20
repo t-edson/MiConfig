@@ -11,7 +11,7 @@ Está basado en la librería ConfigFrame, pero a diferencia de esta, aquí las p
 no se separan en "frames", sino que todas las propiedades se manejan en un mismo objeto.
 Para alamacenar las propiedades, se debe crear un objeto TMiConfigINI. Sin embargo,
 la unidad crea por defecto, una isntancia de TMiConfigINI, llamada "cfgFile", que toma
-como nombre <nombre del proyecto.ini>
+como nombre <nombre del proyecto>.ini
 Tiene como dependencia a la librería MisUtils.
 
 Por Tito Hinostroza 29/07/2016
@@ -162,7 +162,8 @@ begin
 end;
 function TMiConfigINI.FileToProperties: boolean;
 {Lee de disco las propiedades registradas
-Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr".}
+Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr", y el elemento
+con error en "ctlErr".}
 var
   r: TParElem;
   iniCfg: TIniFile;
@@ -176,8 +177,13 @@ begin
   MsjErr := dic('Error reading INI file: %s', [fileName]);
   try
     iniCfg := TIniFile.Create(fileName);
+    msjErr := '';
     for r in listParElem do begin
       FileProperty(iniCfg, r, true);
+      if msjErr<>'' then begin
+        ctlErr := r;  //elemento que produjo el error
+        exit(false);   //sale con error y destruyendo iniCfg en el FINALLY
+      end;
       if r.OnFileToProperty<>nil then r.OnFileToProperty;
     end;
     //Terminó con éxito. Actualiza los cambios
@@ -195,25 +201,33 @@ var
   r: TParElem;
   iniCfg: TIniFile; //
 begin
-  Result := false;
-  MsjErr := dic('Error writing INI file: %s', [fileName]);
-  try
-    If FileExists(fileName)  Then  begin  //ve si existe
-       If FileIsReadOnly(fileName) Then begin
-          MsjErr := dic('INI file is only read.');
-          exit(false);
-       End;
-    End;
-    iniCfg := TIniFile.Create(fileName);
-    for r in listParElem do begin
-      if r.OnPropertyToFile<>nil then r.OnPropertyToFile;  //se ejecuta antes
-      FileProperty(iniCfg, r, false);
-    end;
-    Result := true;  //sin error
-    MsjErr := '';    //sin error
-  finally
-    iniCfg.Free;      //libera
+  if FileExists(fileName) then begin  //ve si existe
+     if FileIsReadOnly(fileName) then begin
+       ctlErr := nil;
+       MsjErr := dic('INI file is only read.');
+       exit(false);
+     end;
   end;
+  try
+    iniCfg := TIniFile.Create(fileName);
+  except
+    ctlErr := nil;
+    MsjErr := dic('Error writing INI file: %s', [fileName]);
+    exit(false);
+  end;
+  msjErr := '';
+  for r in listParElem do begin
+    if r.OnPropertyToFile<>nil then r.OnPropertyToFile;  //se ejecuta antes
+    FileProperty(iniCfg, r, false);
+    if msjErr<>'' then begin
+      ctlErr := r;   //elemento que produjo el error
+      iniCfg.Free;   //libera
+      exit(false);   //sale con error
+    end;
+  end;
+  ctlErr := nil;
+  iniCfg.Free;    //libera
+  exit(true);     //sin error
 end;
 //Constructor y Destructor
 constructor TMiConfigINI.Create(INIfile0: string);
