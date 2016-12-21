@@ -125,7 +125,7 @@ type
     listParElem : TParElem_list;
     procedure PropertyWindow(r: TParElem; PropToWindow: boolean);
   public  //Rutinas de movimientos entre: Controles <-> Propiedades <-> Archivo
-    OnPropertiesChanges: procedure of object;
+    OnPropertiesChanges: procedure of object; //Cuando se actualizan las propiedades
     function PropertiesToWindow: boolean; virtual;
     function WindowToProperties: boolean; virtual;
 
