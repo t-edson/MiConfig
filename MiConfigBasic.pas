@@ -139,10 +139,10 @@ type
     function Asoc_Int(etiq: string; ptrInt: pointer; spEdit: TSpinEdit;
                       defVal: integer): TParElem;
     //---------------------------------------------------------------------
-    function Asoc_Dbl(etiq: string; ptrDbl: pointer; defVal: double): TParElem;
-    function Asoc_Dbl(etiq: string; ptrDbl: pointer; edit: TEdit;
+    function Asoc_Dbl(etiq: string; ptrDbl: PDouble; defVal: double): TParElem;
+    function Asoc_Dbl(etiq: string; ptrDbl: PDouble; edit: TEdit;
                       defVal: double; minVal, maxVal: double): TParElem;
-    function Asoc_Dbl(etiq: string; ptrDbl: pointer; spEdit: TFloatSpinEdit;
+    function Asoc_Dbl(etiq: string; ptrDbl: PDouble; spEdit: TFloatSpinEdit;
                       defVal: double): TParElem;
     //---------------------------------------------------------------------
     function Asoc_Str(etiq: string; ptrStr: pointer;  defVal: string): TParElem;
@@ -579,7 +579,7 @@ begin
   Result.tipPar := tp_Int_TSpinEdit;  //tipo de par
 end;
 //---------------------------------------------------------------------
-function TMiConfigBasic.Asoc_Dbl(etiq: string; ptrDbl: pointer; defVal: double
+function TMiConfigBasic.Asoc_Dbl(etiq: string; ptrDbl: PDouble; defVal: double
   ): TParElem;
 var
   r: TParElem;
@@ -592,7 +592,7 @@ begin
   listParElem.Add(r);
   Result := r;
 end;
-function TMiConfigBasic.Asoc_Dbl(etiq: string; ptrDbl: pointer; edit: TEdit;
+function TMiConfigBasic.Asoc_Dbl(etiq: string; ptrDbl: PDouble; edit: TEdit;
   defVal: double; minVal, maxVal: double): TParElem;
 //Agrega un par variable double - Control TEdit
 begin
@@ -602,7 +602,7 @@ begin
   Result.minDbl := minVal;    //protección de rango
   Result.maxDbl := maxVal;    //protección de rango
 end;
-function TMiConfigBasic.Asoc_Dbl(etiq: string; ptrDbl: pointer;
+function TMiConfigBasic.Asoc_Dbl(etiq: string; ptrDbl: PDouble;
   spEdit: TFloatSpinEdit; defVal: double): TParElem;
 begin
   Result := Asoc_Dbl(etiq, ptrDbl, defVal);

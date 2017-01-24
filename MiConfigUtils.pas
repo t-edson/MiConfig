@@ -11,7 +11,7 @@ unit MiConfigUtils;
 {$mode objfpc}{$H+}
 interface
 uses
-  Classes, SysUtils, Graphics, Forms, ComCtrls, LCLProc;
+  Classes, SysUtils, Graphics, Forms, ComCtrls;
 
 type
   TlistFrames = array of TFrame;
@@ -19,10 +19,13 @@ type
   //Utilidades para el uso de Frames con "MiCOnfig"
   procedure HideAllFrames(form: TForm);
   procedure ShowFramePos(frm: TFrame; x, y: integer);
-  //Utilidades para el uso de TTree con "MiCOnfig"
+  //Utilidades para el uso de TTreeView con Frames con "MiCOnfig"
   function IdFromTTreeNode(node: TTreeNode): string;
   function TTreeNodeFromId(Id: string; tree: TTreeView): TTreeNode;
   function AddNodeToTreeView(tree: TTreeView; id, Caption: string): TTreeNode;
+  function LinkFrameToTreeView(tree: TTreeView; id, Caption: string;
+           frame: TFrame = nil): TTreeNode;
+  function ShowFrameOfNode(form: Tform; node: TTreeNode; x, y: integer): boolean;
 
 implementation
 
@@ -156,7 +159,6 @@ begin
     nodRaiz := nil;   //inicia en nodo raiz
     for niv in niveles do begin
       nodRaiz := BuscarNodoN(tree, nodRaiz, niv);
-      debugln(niv);
     end;
     nod := nodRaiz;
     niveles.Destroy
@@ -167,9 +169,39 @@ begin
   Result := nod;
 end;
 
-initialization
-
-finalization
+function LinkFrameToTreeView(tree: TTreeView; id, Caption: string;
+         frame: TFrame = nil): TTreeNode;
+{Crea un nodo en el TreeView y lo asocias a un Frame de configuración (Ver documentación
+de MiConfig). Debe llamarse, después de crear el Frame.
+El "id", debe ser único y es de la forma: "1", "2.1" o "3.2.1".
+Si se indica el Frame en NIL, no se crea configura el Frame,solo se agrega el ítem}
+begin
+  Result := AddNodeToTreeView(tree, id, Caption);  //Crea el ítem el el TreeView
+  if frame<>nil then begin
+    //Agrega el ID en la etiqueta, para indicar que está asociado a ese nodo
+    frame.Hint := frame.Hint + id + '|';
+  end;
+end;
+function ShowFrameOfNode(form: Tform; node: TTreeNode; x, y: integer): boolean;
+{Muestra el frame correspondiente a un nodo. La correspondencia Frame-nodo, debe
+haberse indicado con LinkFrameToTreeView().
+Si no encuentra el frame para mostrar, devuelve FALSE.}
+var
+  id: String;
+  f: TFrame;
+begin
+  HideAllFrames(form);
+  id := IdFromTTreeNode(node);
+  //Ubica al Frame
+  for f in ListOfFrames(form) do begin
+    if pos(id+'|', f.Hint)<>0 then begin
+      ShowFramePos(f, x, y);  //muestra
+      exit(true);
+    end;
+  end;
+  //No encontró
+  exit(false)
+end;
 
 end.
 
