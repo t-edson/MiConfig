@@ -77,7 +77,7 @@ var
 begin
   if r.pVar = nil then exit;   //se inició con NIL
   case r.tipPar of
-  tp_Int, tp_Int_TEdit, tp_Int_TSpinEdit:
+  tp_Int, tp_Int_TEdit, tp_Int_TSpinEdit, tp_Int_TRadioGroup:
     if FileToProp then begin  //lee entero
       r.AsInteger := xmlCfg.GetValue(r.etiqVar + '/Val', r.defInt)
     end else begin

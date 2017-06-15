@@ -14,3 +14,9 @@ Se crea el campo TMiConfigBasic.ctlErr, para devolver la referencia al control q
 error.
 Se mejora las rutinas de detección de errores en TMiConfigXML.PropertiesToFile() y
 TMiConfigINI.PropertiesToFile().
+
+Se cambia el tipo de parámetro de Asoc_Dbl() a "PDouble", en lugar de simplemente "pointe"r,
+para recordar que debe ser un puntero a Double. Ya que hay problemas si se usa otro tipo 
+como Single.
+
+Se agrega la asociación tp_Int_TRadioGroup.

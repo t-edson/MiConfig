@@ -41,6 +41,7 @@ type
    tp_Int             //Entero sin asociación
   ,tp_Int_TEdit       //entero asociado a TEdit
   ,tp_Int_TSpinEdit   //entero asociado a TSpinEdit
+  ,tp_Int_TRadioGroup  //entero asociado a TRadioGroup
 
   ,tp_Dbl             //Double sin asociación
   ,tp_Dbl_TEdit       //Double asociado a TEdit
@@ -137,6 +138,8 @@ type
     function Asoc_Int(etiq: string; ptrInt: pointer; edit: TEdit;
                       defVal: integer; minVal, maxVal: integer): TParElem;
     function Asoc_Int(etiq: string; ptrInt: pointer; spEdit: TSpinEdit;
+                      defVal: integer): TParElem;
+    function Asoc_Int(etiq: string; ptrInt: pointer; radGroup: TRadioGroup;
                       defVal: integer): TParElem;
     //---------------------------------------------------------------------
     function Asoc_Dbl(etiq: string; ptrDbl: PDouble; defVal: double): TParElem;
@@ -241,6 +244,7 @@ var
   gr: TStringGrid;
   spEd: TSpinEdit;
   spFloatEd: TFloatSpinEdit;
+  rdGr: TRadioGroup;
 begin
   if r.pVar = nil then exit;   //se inició con NIL
   case r.tipPar of
@@ -261,6 +265,14 @@ begin
     end else begin
        spEd := TSpinEdit(r.pCtl);
        r.AsInteger := spEd.Value;
+    end;
+  tp_Int_TRadioGroup:
+    if PropToWindow then begin  //entero en TSpinEdit
+       //carga entero
+       TRadioGroup(r.pCtl).ItemIndex := r.AsInteger;
+    end else begin
+       rdGr := TRadioGroup(r.pCtl);
+       r.AsInteger := rdGr.ItemIndex;
     end;
   //---------------------------------------------------------------------
   tp_Dbl:;
@@ -577,6 +589,14 @@ begin
   Result := Asoc_Int(etiq, ptrInt, defVal);
   Result.pCtl   := spEdit;    //toma referencia
   Result.tipPar := tp_Int_TSpinEdit;  //tipo de par
+end;
+function TMiConfigBasic.Asoc_Int(etiq: string; ptrInt: pointer;
+  radGroup: TRadioGroup; defVal: integer): TParElem;
+//Agrega un par variable entera - Control TRadioGroup
+begin
+  Result := Asoc_Int(etiq, ptrInt, defVal);
+  Result.pCtl   := radGroup;    //toma referencia
+  Result.tipPar := tp_Int_TRadioGroup;  //tipo de par
 end;
 //---------------------------------------------------------------------
 function TMiConfigBasic.Asoc_Dbl(etiq: string; ptrDbl: PDouble; defVal: double
