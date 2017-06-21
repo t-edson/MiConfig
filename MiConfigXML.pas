@@ -126,7 +126,7 @@ begin
       end;
     end;
   //---------------------------------------------------------------------
-  tp_TCol_TColBut:
+  tp_TCol_TColBut, tp_TCol_TColBox:
     if FileToProp then begin  //lee TColor
       r.AsTColor := xmlCfg.GetValue(r.etiqVar + '/Val',  r.defCol);  //lee como entero
     end else begin

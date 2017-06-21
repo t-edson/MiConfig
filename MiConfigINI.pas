@@ -134,7 +134,7 @@ begin
       end;
     end;
   //---------------------------------------------------------------------
-  tp_TCol_TColBut:
+  tp_TCol_TColBut, tp_TCol_TColBox:
     if FileToProp then begin  //lee TColor
       r.AsTColor := iniCfg.ReadInteger(secINI, r.etiqVar, r.defCol);
     end else begin

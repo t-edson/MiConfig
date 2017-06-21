@@ -34,7 +34,7 @@ unit MiConfigBasic;
 interface
 uses
   Classes, SysUtils, StdCtrls, Spin, Graphics, MisUtils, EditBtn, Dialogs,
-  ExtCtrls, Grids, fgl;
+  ExtCtrls, Grids, ColorBox, fgl;
 type
   //Tipos de asociaciones
   TTipPar = (
@@ -61,6 +61,7 @@ type
   ,tp_Enum_TRadGroup  //Enumerado asociado a TRadioGroup
 
   ,tp_TCol_TColBut    //TColor asociado a TColorButton
+  ,tp_TCol_TColBox    //TColor asociado a TColorBox
 
   ,tp_StrList         //TStringList sin asociación
   ,tp_StrList_TListBox //StringList asociado a TListBox
@@ -169,6 +170,8 @@ type
                        radGroup: TRadioGroup;  defVal: integer): TParElem;
     //---------------------------------------------------------------------
     function Asoc_TCol(etiq: string; ptrTCol: pointer; colBut: TColorButton;
+                             defVal: TColor): TParElem;
+    function Asoc_TCol(etiq: string; ptrTCol: pointer; colBut: TColorBox;
                              defVal: TColor): TParElem;
     //---------------------------------------------------------------------
     function Asoc_StrList(etiq: string; ptrStrList: pointer): TParElem;
@@ -390,6 +393,12 @@ begin
        TColorButton(r.pCtl).ButtonColor := r.AsTColor;
     end else begin
        r.AsTColor := TColorButton(r.pCtl).ButtonColor;
+    end;
+  tp_TCol_TColBox:
+    if PropToWindow then begin //Tcolor a TColorButton
+       TColorBox(r.pCtl).Selected := r.AsTColor;
+    end else begin
+       r.AsTColor := TColorBox(r.pCtl).Selected;
     end;
   //---------------------------------------------------------------------
   tp_StrList:; //no tiene control asociado
@@ -755,6 +764,21 @@ begin
   r.pVar   := ptrTCol;    //toma referencia
   r.pCtl   := colBut;    //toma referencia a control
   r.tipPar := tp_TCol_TColBut;  //tipo de par
+  r.etiqVar:= etiq;
+  r.defCol := defVal;
+  listParElem.Add(r);
+  Result := r;
+end;
+function TMiConfigBasic.Asoc_TCol(etiq: string; ptrTCol: pointer; colBut: TColorBox;
+                         defVal: TColor): TParElem;
+//Agrega un par variable TColor - Control TColorButton
+var
+  r: TParElem;
+begin
+  r := TParElem.Create;
+  r.pVar   := ptrTCol;    //toma referencia
+  r.pCtl   := colBut;    //toma referencia a control
+  r.tipPar := tp_TCol_TColBox;  //tipo de par
   r.etiqVar:= etiq;
   r.defCol := defVal;
   listParElem.Add(r);

@@ -20,3 +20,4 @@ para recordar que debe ser un puntero a Double. Ya que hay problemas si se usa o
 como Single.
 
 Se agrega la asociación tp_Int_TRadioGroup.
+Se agrega la asociación tp_TCol_TColBox.
