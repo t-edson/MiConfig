@@ -74,6 +74,10 @@ type
 
   TParElem = class
   private  //Getters and setters
+    pCtl: TComponent;  //referencia al control
+    radButs: array of TRadioButton;  //referencia a controles TRadioButton (se usan en conjunto)
+    minEnt, maxEnt: integer;  //valores máximos y mínimos para variables enteras
+    minDbl, maxDbl: Double;  //valores máximos y mínimos para variables Double
     function GetAsBoolean: Boolean;
     function GetAsInteger: integer;
     procedure SetAsBoolean(AValue: Boolean);
@@ -87,14 +91,11 @@ type
     function GetAsTColor: TColor;
     procedure SetAsTColor(AValue: TColor);
   public
-    pVar: pointer;     //referencia a la variable
-    lVar: integer;     //tamaño de variable. (Cuando no sea conocido)
-    pCtl: TComponent;  //referencia al control
-    radButs: array of TRadioButton;  //referencia a controles TRadioButton (se usan en conjunto)
-    tipPar: TTipPar;   //tipo de par agregado
-    etiqVar: string;   //etiqueta usada para grabar la variable en archivo INI
-    minEnt, maxEnt: integer;  //valores máximos y mínimos para variables enteras
-    minDbl, maxDbl: Double;  //valores máximos y mínimos para variables Double
+    pVar   : pointer;  //referencia a la variable
+    lVar   : integer;  //tamaño de variable. (Cuando no sea conocido)
+    tipPar : TTipPar;  //tipo de par agregado
+    etiqVar: string;   //etiqueta usada para grabar la variable en archivo INI o XML
+    categ  : integer;  //Categoría. Usada para leer selectivamente con
     //Campos para configurar la grilla, cuando se use
     HasHeader  : boolean;  //Si incluye encabezado
     HasFixedCol: boolean;   //Si tiene una columna fija

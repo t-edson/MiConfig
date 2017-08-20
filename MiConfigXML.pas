@@ -29,11 +29,15 @@ type
     fileName    : string;   //archivo XML
     function DefaultFileName: string;
     procedure FileProperty(xmlCfg: TXMLConfig; const r: TParElem; FileToProp: boolean);
+    function LoadXMLFile(filName: string; var xmlCfg: TXMLConfig): boolean;
   public
     secINI: string;   //sección donde se guardarán los datos en un archivo INI
     procedure VerifyFile;
     function FileToProperties: boolean; virtual;
+    function FileToPropertiesCat(xmlFil: string; cat: integer): boolean;
+    function PropertiesToWindowCat(cat: integer): boolean;
     function PropertiesToFile: boolean; virtual;
+    function ReadFileName: string;
   public  //Constructor y Destructor
     constructor Create(XMLfile0: string);
     destructor Destroy; override;
@@ -47,6 +51,26 @@ implementation
 
 
 { TMiConfigXML }
+function TMiConfigXML.LoadXMLFile(filName: string; var xmlCfg: TXMLConfig): boolean;
+{Carga el archivo "filName" en xmlCfg. Si hay error, actualiza "MsjError" y
+devuelve FALSE. Función creada para uso interno de la clase.}
+begin
+  msjErr := '';
+  if not FileExists(filName) then begin
+    ctlErr := nil;
+    MsjErr := dic('XML file does not exist.');  //errro
+    exit(false);  //para que no intente leer
+  end;
+  try
+    xmlCfg := TXMLConfig.Create(nil);
+    xmlCfg.Filename := filName;  //lee archivo XML, al asignar propiedad
+  except
+    ctlErr := nil;
+    MsjErr := dic('Error reading XML file: %s', [filName]);
+    xmlCfg.Free;
+    exit(false);
+  end;
+end;
 function TMiConfigXML.DefaultFileName: string;
 {Devuelve el nombre por defecto del archvio de configuración}
 begin
@@ -154,27 +178,13 @@ var
   r: TParElem;
   xmlCfg: TXMLConfig;
 begin
-  if not FileExists(fileName) then begin
-    ctlErr := nil;
-    MsjErr := dic('XML file does not exist.');  //errro
-    exit(false);  //para que no intente leer
-  end;
-  try
-    xmlCfg := TXMLConfig.Create(nil);
-    xmlCfg.Filename := fileName;  //lee archivo XML
-  except
-    ctlErr := nil;
-    MsjErr := dic('Error reading XML file: %s', [fileName]);
-    xmlCfg.Free;
-    exit(false);
-  end;
-  msjErr := '';
+  if not LoadXMLFile(fileName, xmlCfg) then exit(false);
   for r in listParElem do begin
     FileProperty(xmlCfg, r, true);
     if msjErr<>'' then begin
       ctlErr := r;  //elemento que produjo el error
       xmlCfg.Free;  //libera
-      exit(false);   //sale con error
+      exit(false);  //sale con error
     end;
     if r.OnFileToProperty<>nil then r.OnFileToProperty;
   end;
@@ -183,6 +193,48 @@ begin
   ctlErr := nil;
   xmlCfg.Free;  //libera
   exit(true);   //sale sin error
+end;
+function TMiConfigXML.FileToPropertiesCat(xmlFil: string; cat: integer): boolean;
+{Lee de disco las propiedades registradas con una categoría específica.
+Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr", y el elemento
+con error en "ctlErr".
+Es similar a FileToProperties(), pero no genera eventos. Se creó  pensando usarse
+en casos como una rutina independiente para cargar solo ciertas propiedades de un
+archivo de configuración, como cuando se manejan configuraciones de colores (temas)}
+var
+  r: TParElem;
+  xmlCfg: TXMLConfig;
+begin
+  if not LoadXMLFile(xmlFil, xmlCfg) then exit(false);
+  for r in listParElem do begin
+    if r.categ<>cat then continue;  //ignora los de otra categoría
+    FileProperty(xmlCfg, r, true);
+    if msjErr<>'' then begin
+      ctlErr := r;  //elemento que produjo el error
+      xmlCfg.Free;  //libera
+      exit(false);  //sale con error
+    end;
+  end;
+  //Terminó con éxito. Actualiza los cambios
+  ctlErr := nil;
+  xmlCfg.Free;  //libera
+  exit(true);   //sale sin error
+end;
+function TMiConfigXML.PropertiesToWindowCat(cat: integer): boolean;
+{Versión de PropertiesToWindow, que solo trabaja con una categoría, y no genera
+eventos.}
+var
+  r: TParElem;
+begin
+  msjErr := '';
+  for r in listParElem do begin
+    if r.categ<>cat then continue;  //ignora los de otra categoría
+    PropertyWindow(r, true);
+    if msjErr<>'' then begin
+      ctlErr := r;  //guarda la referencia al elemento, en caso de que haya error
+    end;
+  end;
+  Result := (msjErr='');
 end;
 function TMiConfigXML.PropertiesToFile: boolean;
 {Guarda en disco las propiedades registradas
@@ -223,6 +275,10 @@ begin
   ctlErr := nil;
   xmlCfg.Free;
   exit(true);     //sin error
+end;
+function TMiConfigXML.ReadFileName: string;
+begin
+  Result := fileName;
 end;
 //Constructor y Destructor
 constructor TMiConfigXML.Create(XMLfile0: string);

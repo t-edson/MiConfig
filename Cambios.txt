@@ -1,3 +1,13 @@
+Cambios en la versión 0.4
+=========================
+Se ponen algunas propiedades como privadas en la clase TParElem.
+Se mueven las rutinas de verificación de TMiConfigXML.FileToProperties() a 
+TMiConfigXML.LoadXMLFile().
+Se crean los métodos TMiConfigXML.FileToPropertiesCat() y 
+TMiConfigXML.PropertiesToWindowCat().
+Se crea el método TMiConfigXML.ReadFileName.  
+
+
 Cambios en la versión 0.3
 =========================
 
