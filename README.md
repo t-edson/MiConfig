@@ -1,5 +1,5 @@
-MiConfig 0.3b
-=============
+MiConfig 04
+===========
 
 ## Descripción
 
