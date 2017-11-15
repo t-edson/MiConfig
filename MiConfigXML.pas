@@ -56,6 +56,7 @@ function TMiConfigXML.LoadXMLFile(filName: string; var xmlCfg: TXMLConfig): bool
 devuelve FALSE. Función creada para uso interno de la clase.}
 begin
   msjErr := '';
+  Result := true;
   if not FileExists(filName) then begin
     ctlErr := nil;
     MsjErr := dic('XML file does not exist.');  //errro
