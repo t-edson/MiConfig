@@ -4,7 +4,7 @@
   <MyInt Val="5"/>
   <MyFloat Val="5.14"/>
   <MyBool Val="False"/>
-  <MyColor Val="16777215"/>
+  <MyColor Val="8454016"/>
   <MyEnum Val="1"/>
   <MyMultStr Val="line1
 line2"/>

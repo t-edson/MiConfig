@@ -2,7 +2,7 @@ unit FormConfig;
 {$mode objfpc}{$H+}
 interface
 uses
-  Forms, Graphics, Buttons, StdCtrls, MiConfigXML, MisUtils;
+  Forms, Graphics, Buttons, StdCtrls, MiConfigINI, MisUtils;
 type
   { TConfig }
   TConfig = class(TForm)
