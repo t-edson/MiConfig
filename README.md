@@ -165,7 +165,3 @@ begin
   self.Close;
 end;
 ```
-## Dependencias
-
-Esta librería requiere de la librería MisUtils: https://github.com/t-edson/MisUtils
-
