@@ -20,16 +20,16 @@ unit MiConfigXML;
 {$mode objfpc}{$H+}
 interface
 uses
-  Classes, SysUtils, Graphics, Forms, Laz2_XMLCfg, MisUtils, MiConfigBasic;
+  Classes, SysUtils, Graphics, Forms, LCLType, Laz2_XMLCfg, MiConfigBasic;
 type
   { TMiConfigXML }
   {Clase base que es usada para manejar los campos de configuración.}
   TMiConfigXML = class(TMiConfigBasic)
-  private
+  protected
     fileName    : string;   //archivo XML
     function DefaultFileName: string;
     procedure FileProperty(xmlCfg: TXMLConfig; const r: TParElem; FileToProp: boolean);
-    function LoadXMLFile(filName: string; var xmlCfg: TXMLConfig): boolean;
+    function LoadXMLFile(filName: string; out xmlCfg: TXMLConfig): boolean;
   public
     secINI: string;   //sección donde se guardarán los datos en un archivo INI
     procedure VerifyFile;
@@ -37,7 +37,8 @@ type
     function FileToPropertiesCat(xmlFil: string; cat: integer): boolean;
     function PropertiesToWindowCat(cat: integer): boolean;
     function PropertiesToFile: boolean; virtual;
-    function ReadFileName: string;
+    function GetFileName: string;
+    procedure SetFileName(AValue: string);
   public  //Constructor y Destructor
     constructor Create(XMLfile0: string);
     destructor Destroy; override;
@@ -51,7 +52,7 @@ implementation
 
 
 { TMiConfigXML }
-function TMiConfigXML.LoadXMLFile(filName: string; var xmlCfg: TXMLConfig): boolean;
+function TMiConfigXML.LoadXMLFile(filName: string; out xmlCfg: TXMLConfig): boolean;
 {Carga el archivo "filName" en xmlCfg. Si hay error, actualiza "MsjError" y
 devuelve FALSE. Función creada para uso interno de la clase.}
 begin
@@ -59,7 +60,7 @@ begin
   Result := true;
   if not FileExists(filName) then begin
     ctlErr := nil;
-    MsjErr := dic('XML file does not exist.');  //errro
+    MsjErr := 'XML file does not exist.';  //errro
     exit(false);  //para que no intente leer
   end;
   try
@@ -67,7 +68,7 @@ begin
     xmlCfg.Filename := filName;  //lee archivo XML, al asignar propiedad
   except
     ctlErr := nil;
-    MsjErr := dic('Error reading XML file: %s', [filName]);
+    MsjErr := Format('Error reading XML file: %s', [filName]);
     xmlCfg.Free;
     exit(false);
   end;
@@ -83,8 +84,10 @@ var
   F: textfile;
 begin
   if not FileExists(fileName) then begin
-    MsgErr('No XML file found: %s', [fileName]);
-    //crea uno vacío para leer las opciones por defecto
+    Application.MessageBox(
+      Pchar(Format('No XML file found: %s', [fileName])),
+      '', MB_ICONERROR);
+    //Crea uno vacío para leer las opciones por defecto
     AssignFile(F, fileName);
     Rewrite(F);
     writeln(F, '<?xml version="1.0" encoding="utf-8"?>');
@@ -139,14 +142,14 @@ begin
        if r.lVar = 4 then begin  //tamaño común de las variable enumeradas
          r.AsInt32 := xmlCfg.GetValue(r.etiqVar + '/Val', r.defInt);
        end else begin  //tamaño no implementado
-         msjErr := dic('Enumerated type no handled.');
+         msjErr := 'Enumerated type no handled.';
          exit;
        end;
     end else begin
       if r.lVar = 4 then begin
         xmlCfg.SetValue(r.etiqVar + '/Val', r.AsInt32) ;
       end else begin  //tamaño no implementado
-        msjErr := dic('Enumerated type no handled.');
+        msjErr := 'Enumerated type no handled.';
         exit;
       end;
     end;
@@ -167,7 +170,7 @@ begin
       xmlCfg.SetValue(r.etiqVar + '/Val', list.Text);  //escribe como texto
     end;
   else  //no se ha implementado bien
-    msjErr := dic('Design error.');
+    msjErr := 'Design error.';
     exit;
   end;
 end;
@@ -248,7 +251,7 @@ begin
   if FileExists(fileName) then begin  //ve si existe
      if FileIsReadOnly(fileName) then begin
        ctlErr := nil;
-       MsjErr := dic('XML file is only read.');
+       MsjErr := 'XML file is only read.';
        exit(false);
      end;
   end;
@@ -258,7 +261,7 @@ begin
     xmlCfg.Clear;
   except
     ctlErr := nil;
-    MsjErr := dic('Error writing XML file: %s', [fileName]);
+    MsjErr := Format('Error writing XML file: %s', [fileName]);
     xmlCfg.Free;
     exit(false);
   end;
@@ -277,10 +280,16 @@ begin
   xmlCfg.Free;
   exit(true);     //sin error
 end;
-function TMiConfigXML.ReadFileName: string;
+function TMiConfigXML.GetFileName: string;
 begin
   Result := fileName;
 end;
+
+procedure TMiConfigXML.SetFileName(AValue: string);
+begin
+  fileName := AValue;
+end;
+
 //Constructor y Destructor
 constructor TMiConfigXML.Create(XMLfile0: string);
 begin

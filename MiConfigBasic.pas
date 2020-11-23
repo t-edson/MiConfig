@@ -33,7 +33,7 @@ unit MiConfigBasic;
 {$mode objfpc}{$H+}
 interface
 uses
-  Classes, SysUtils, StdCtrls, Spin, Graphics, MisUtils, EditBtn, Dialogs,
+  Classes, SysUtils, StdCtrls, Spin, Graphics, EditBtn, Dialogs,
   ExtCtrls, Grids, ColorBox, fgl;
 type
   //Tipos de asociaciones
@@ -102,15 +102,15 @@ type
     ColCount   : byte;     //Cantidad de columnas para la grilla
     OnPropertyToWindow: procedure of object;
     OnWindowToProperty: procedure of object;
-    OnFileToProperty: procedure of object;   //después de guardar el elemento a disco
-    OnPropertyToFile: procedure of object;   //antes de guardar el elemento a disco
-  public  //valores por defecto
-    defInt: integer;   //valor entero por defecto al leer de archivo
-    defDbl: Double;    //valor double por defecto al leer de archivo
-    defStr: string;    //valor string por defecto al leer de archivo
-    defBol: boolean;   //valor booleano por defecto al leer de archivo
-    defCol: TColor;    //valor TColor por defecto al leer de archivo
-  public  //propiedades para facilitar el acceso a pVar^, usando diversos tipos
+    OnFileToProperty: procedure of object;   //Después de guardar el elemento a disco
+    OnPropertyToFile: procedure of object;   //Antes de guardar el elemento a disco
+  public  //Valores por defecto
+    defInt: integer;   //Valor entero por defecto al leer de archivo
+    defDbl: Double;    //Valor double por defecto al leer de archivo
+    defStr: string;    //Valor string por defecto al leer de archivo
+    defBol: boolean;   //Valor booleano por defecto al leer de archivo
+    defCol: TColor;    //Valor TColor por defecto al leer de archivo
+  public  //Propiedades para facilitar el acceso a pVar^, usando diversos tipos
     property AsInteger: integer read GetAsInteger write SetAsInteger;
     property AsDouble: double read GetAsDouble write SetAsDouble;
     property AsString: string read GetAsString write SetAsString;
@@ -122,6 +122,8 @@ type
 
   { TMiConfigBasic }
   TMiConfigBasic = class
+  private
+    procedure SetFocusEd(ed: TEdit);
   protected
     valInt: integer;  //valor entero de salida
     valDbl: Double;  //valor double de salida
@@ -351,7 +353,7 @@ begin
           if n<=High(r.radButs) then
             r.radButs[n].checked := true;  //lo activa
         end else begin  //tamño no implementado
-          msjErr := dic('Enumerated type no handled.');
+          msjErr := 'Enumerated type no handled.';
           exit;
         end;
     end else begin
@@ -363,7 +365,7 @@ begin
                r.AsInt32 := j;  //guarda
                break;
              end else begin  //tamaño no implementado
-               msjErr := dic('Enumerated type no handled.');
+               msjErr := 'Enumerated type no handled.';
                exit;
              end;
            end;
@@ -376,7 +378,7 @@ begin
           if n<TRadioGroup(r.pCtl).Items.Count then
             TRadioGroup(r.pCtl).ItemIndex:=n; //activa
         end else begin  //tamño no implementado
-          msjErr := dic('Enumerated type no handled.');
+          msjErr := 'Enumerated type no handled.';
           exit;
         end;
     end else begin
@@ -384,7 +386,7 @@ begin
        if r.lVar = 4 then begin  //se puede manejar como entero
          r.AsInt32 := TRadioGroup(r.pCtl).ItemIndex;  //lee
        end else begin  //tamaño no implementado
-         msjErr := dic('Enumerated type no handled.');
+         msjErr := 'Enumerated type no handled.';
          exit;
        end;
     end;
@@ -443,7 +445,7 @@ begin
       //????????
     end;
   else  //no se ha implementado bien
-    msjErr := dic('Design error.');
+    msjErr := 'Design error.';
     exit;
   end;
 end;
@@ -465,7 +467,7 @@ begin
   Result := (msjErr='');
 end;
 function TMiConfigBasic.WindowToProperties: boolean;
-{Lee en las variables asociadas, los valores de loc controles
+{Lee en las variables asociadas, los valores de los controles
 Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr", y el elemento
 con error en "ctlErr".}
 var
@@ -482,6 +484,17 @@ begin
   //Terminó con éxito. Actualiza los cambios
   if OnPropertiesChanges<>nil then OnPropertiesChanges;
   Result := (msjErr='');  //si hubo error, se habrá actualizado "ctlErr"
+end;
+procedure TMiConfigBasic.SetFocusEd(ed: TEdit);
+{Pone el enfoque en un TEdit, si es posible.}
+begin
+  try
+    if ed.visible and ed.enabled and ed.CanFocus then begin  //Valida condiciones.
+      ed.SetFocus;  //Pone enfoque.
+    end;
+    //Ya si todo falla, solo confiamos en el "try"
+  finally
+  end;
 end;
 //Rutinas de validación
 function TMiConfigBasic.EditValidateInt(edit: TEdit; min: integer; max: integer): boolean;
@@ -501,8 +514,8 @@ begin
   larMaxInt := length(IntToStr(MaxInt));
   tmp := trim(edit.Text);
   if tmp = '' then begin
-    MsjErr:= dic('Field must contain a value.');
-    if edit.visible and edit.enabled then edit.SetFocus;
+    MsjErr:= 'Field must contain a value.';
+    SetFocusEd(edit);
     exit;
   end;
   if tmp[1] = '-' then begin  //es negativo
@@ -511,26 +524,26 @@ begin
   end;
   for c in tmp do begin
     if not (c in ['0'..'9']) then begin
-      MsjErr:= dic('Only numeric values are allowed.');
-      if edit.visible and edit.enabled then edit.SetFocus;
+      MsjErr:= 'Only numeric values are allowed.';
+      SetFocusEd(edit);
       exit;
     end;
   end;
   if length(tmp) > larMaxInt then begin
-    MsjErr:= dic('Numeric value is too large.');
-    if edit.visible and edit.enabled then edit.SetFocus;
+    MsjErr:= 'Numeric value is too large.';
+    SetFocusEd(edit);
     exit;
   end;
   //lo leemos en Int64 por seguridad y validamos
   n := StrToInt64(signo + tmp);
   if n>max then begin
-    MsjErr:= dic('The maximun allowed value is: %d', [max]);
-    if edit.visible and edit.enabled then edit.SetFocus;
+    MsjErr:= Format('The maximun allowed value is: %d', [max]);
+    SetFocusEd(edit);
     exit;
   end;
   if n<min then begin
-    MsjErr:= dic('The minimun allowed value is: %d', [min]);
-    if edit.visible and edit.enabled then edit.SetFocus;
+    MsjErr:= Format('The minimun allowed value is: %d', [min]);
+    SetFocusEd(edit);
     exit;
   end;
   //pasó las validaciones
@@ -548,19 +561,19 @@ begin
   Result := false;
   //intenta convertir
   if not TryStrToFloat(edit.Text, d) then begin
-    MsjErr:= dic('Wrong float number.');
-    if edit.visible and edit.enabled then edit.SetFocus;
+    MsjErr:= 'Wrong float number.';
+    SetFocusEd(edit);
     exit;
   end;
   //validamos
   if d>max then begin
-    MsjErr:= dic('The maximun allowed value is: %f', [max]);
-    if edit.visible and edit.enabled then edit.SetFocus;
+    MsjErr:= Format('The maximun allowed value is: %f', [max]);
+    SetFocusEd(edit);
     exit;
   end;
   if d<min then begin
-    MsjErr:= dic('The minimun allowed value is: %f', [min]);
-    if edit.visible and edit.enabled then edit.SetFocus;
+    MsjErr:= Format('The minimun allowed value is: %f', [min]);
+    SetFocusEd(edit);
     exit;
   end;
   //pasó las validaciones

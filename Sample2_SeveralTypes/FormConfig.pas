@@ -5,7 +5,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Buttons,
   StdCtrls, Spin, MisUtils,
-  MiConfigXML;  //Change to MiConfigINI, to use INI file instead.
+  MiConfigXML, MiConfigINI;  //Change to MiConfigINI, to use INI file instead.
 type
   TMyEnum = (First, Second, Third);
 

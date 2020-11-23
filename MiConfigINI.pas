@@ -20,20 +20,23 @@ unit MiConfigINI;
 {$mode objfpc}{$H+}
 interface
 uses
-  Classes, SysUtils, Graphics, Forms, IniFiles, MisUtils, MiConfigBasic;
+  Classes, SysUtils, Graphics, Forms, LCLType, IniFiles, MiConfigBasic;
 type
   { TMiConfigINI }
   {Clase base que es usada para manejar los campos de configuración.}
   TMiConfigINI = class(TMiConfigBasic)
-  private
+  protected
     fileName    : string;   //archivo XML
     function DefaultFileName: string;
     procedure FileProperty(iniCfg: TIniFile; const r: TParElem; FileToProp: boolean);
+    function LoadINIFile(filName: string; out iniCfg: TIniFile): boolean;
   public
     secINI: string;   //sección donde se guardarán los datos en un archivo INI
     procedure VerifyFile;
     function FileToProperties: boolean; virtual;
     function PropertiesToFile: boolean; virtual;
+    function GetFileName: string;
+    procedure SetFileName(AValue: string);
   public  //Constructor y Destructor
     constructor Create(INIfile0: string);
     destructor Destroy; override;
@@ -61,6 +64,27 @@ begin
   Result := StringReplace(Result, #26, LineEnding, [rfReplaceAll]);  //protege caracter
 end;
 { TMiConfigINI }
+function TMiConfigINI.LoadINIFile(filName: string; out iniCfg: TIniFile): boolean;
+{Carga el archivo "filName" en iniCfg. Si hay error, actualiza "MsjError" y
+devuelve FALSE. Función creada para uso interno de la clase.}
+begin
+  msjErr := '';
+  Result := true;
+  if not FileExists(filName) then begin
+    ctlErr := nil;
+    MsjErr := 'INI file does not exist.';  //error
+    exit(false);  //para que no intente leer
+  end;
+  try
+    iniCfg := TIniFile.Create(filName);
+
+  except
+    ctlErr := nil;
+    MsjErr := Format('Error reading INI file: %s', [filName]);
+    iniCfg.Free;
+    exit(false);
+  end;
+end;
 function TMiConfigINI.DefaultFileName: string;
 {Devuelve el nombre pro defecto del archvio de configuración}
 begin
@@ -72,8 +96,10 @@ var
   F: textfile;
 begin
   if not FileExists(fileName) then begin
-    MsgErr('No INI file found: %s', [fileName]);
-    //crea uno vacío para leer las opciones por defecto
+    Application.MessageBox(
+      Pchar(Format('No INI file found: %s', [fileName])),
+      '', MB_ICONERROR);
+    //Crea uno vacío para leer las opciones por defecto
     AssignFile(F, fileName);
     Rewrite(F);
     CloseFile(F);
@@ -122,14 +148,14 @@ begin
        if r.lVar = 4 then begin  //tamaño común de las variable enumeradas
          r.AsInt32 := iniCfg.ReadInteger(secINI, r.etiqVar, r.defInt);
        end else begin  //tamaño no implementado
-         msjErr := dic('Enumerated type no handled.');
+         msjErr := 'Enumerated type no handled.';
          exit;
        end;
     end else begin
       if r.lVar = 4 then begin
         iniCfg.WriteInteger(secINI, r.etiqVar, r.AsInt32);  //como entero de 4 bytes
       end else begin  //tamaño no implementado
-        msjErr := dic('Enumerated type no handled.');
+        msjErr := 'Enumerated type no handled.';
         exit;
       end;
     end;
@@ -156,10 +182,11 @@ begin
       end;
     end;
   else  //no se ha implementado bien
-    msjErr := dic('Design error.');
+    msjErr := 'Design error.';
     exit;
   end;
 end;
+
 function TMiConfigINI.FileToProperties: boolean;
 {Lee de disco las propiedades registradas
 Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr", y el elemento
@@ -168,20 +195,7 @@ var
   r: TParElem;
   iniCfg: TIniFile;
 begin
-  if not FileExists(fileName) then begin
-    ctlErr := nil;
-    MsjErr := dic('INI file does not exist.');  //errro
-    exit(false);  //para que no intente leer
-  end;
-  try
-    iniCfg := TIniFile.Create(fileName);
-  except
-    ctlErr := nil;
-    MsjErr := dic('Error reading INI file: %s', [fileName]);
-    iniCfg.Free;
-    exit(false);
-  end;
-  msjErr := '';
+  if not LoadINIFile(fileName, iniCfg) then exit(false);
   for r in listParElem do begin
     FileProperty(iniCfg, r, true);
     if msjErr<>'' then begin
@@ -208,7 +222,7 @@ begin
   if FileExists(fileName) then begin  //ve si existe
      if FileIsReadOnly(fileName) then begin
        ctlErr := nil;
-       MsjErr := dic('INI file is only read.');
+       MsjErr := 'INI file is only read.';
        exit(false);
      end;
   end;
@@ -216,7 +230,7 @@ begin
     iniCfg := TIniFile.Create(fileName);
   except
     ctlErr := nil;
-    MsjErr := dic('Error writing INI file: %s', [fileName]);
+    MsjErr := Format('Error writing INI file: %s', [fileName]);
     exit(false);
   end;
   msjErr := '';
@@ -232,6 +246,16 @@ begin
   ctlErr := nil;
   iniCfg.Free;    //libera
   exit(true);     //sin error
+end;
+
+function TMiConfigINI.GetFileName: string;
+begin
+  Result := fileName;
+end;
+
+procedure TMiConfigINI.SetFileName(AValue: string);
+begin
+  fileName := AValue;
 end;
 //Constructor y Destructor
 constructor TMiConfigINI.Create(INIfile0: string);

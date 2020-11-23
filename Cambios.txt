@@ -1,3 +1,13 @@
+Cambios en la versión 0.4.1
+===========================
+Se hace accesible el campo FileName, con el método SetFileName().
+Se cambia de nombre a ReadFileName() por GetFileName().
+Se mejora la rutina de enfoque de un control TEdit, para cuando se detecta errores.
+Se completa y modifica la unidad MiConfig.INI, para que sea similar a MiCOnfigXML, que
+ha tenido algunas modificaciones en las últimas versiones.
+Se cambia acceso de TMiConfigINI y TMiConfigXML, de private a protected.
+Se quita la dependencia de la unidad MisUtils.
+
 Cambios en la versión 0.4
 =========================
 Se ponen algunas propiedades como privadas en la clase TParElem.
