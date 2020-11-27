@@ -15,7 +15,6 @@ type
   TForm1 = class(TForm)
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
   end;
@@ -37,11 +36,6 @@ end;
 procedure TForm1.MenuItem1Click(Sender: TObject);
 begin
   Config.Showmodal;
-end;
-
-procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-begin
-  Config.SaveToFile;  //guarda la configuración actual
 end;
 
 end.

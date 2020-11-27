@@ -9,7 +9,7 @@
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="40" Y="10"/>
+        <CursorPos X="29" Y="10"/>
         <UsageCount Value="67"/>
       </Unit0>
       <Unit1>
@@ -19,20 +19,20 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
-        <CursorPos X="19" Y="38"/>
+        <IsVisibleTab Value="True"/>
+        <CursorPos X="15" Y="9"/>
         <UsageCount Value="67"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="FormConfig.pas"/>
+        <Filename Value="FormSettings.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Config"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="67"/>
-        <CursorPos Y="93"/>
+        <CursorPos X="9" Y="13"/>
         <UsageCount Value="67"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -124,22 +124,20 @@
       </Unit12>
       <Unit13>
         <Filename Value="..\MiConfigXML.pas"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="65"/>
         <CursorPos X="8" Y="90"/>
         <UsageCount Value="23"/>
         <Bookmarks Count="1">
           <Item0 Y="32" ID="1"/>
         </Bookmarks>
-        <Loaded Value="True"/>
       </Unit13>
       <Unit14>
         <Filename Value="..\MiConfigBasic.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="11"/>
         <CursorPos Y="45"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit14>
       <Unit15>
         <Filename Value="C:\lazarus\components\lazutils\laz2_xmlcfg.pas"/>
@@ -164,135 +162,25 @@
       </Unit17>
       <Unit18>
         <Filename Value="..\MiConfigINI.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="83"/>
-        <CursorPos X="25" Y="100"/>
+        <CursorPos X="6" Y="90"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit18>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="3" HistoryIndex="2">
       <Position1>
-        <Filename Value="..\MiConfigBasic.pas"/>
-        <Caret Line="575" Column="20" TopLine="547"/>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="9" Column="9"/>
       </Position1>
       <Position2>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="63" Column="41" TopLine="45"/>
+        <Filename Value="FormSettings.pas"/>
+        <Caret Line="13" Column="9"/>
       </Position2>
       <Position3>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="87" Column="11" TopLine="69"/>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="9" Column="15"/>
       </Position3>
-      <Position4>
-        <Filename Value="..\MiConfigINI.pas"/>
-        <Caret Line="23" Column="49"/>
-      </Position4>
-      <Position5>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="87" Column="10" TopLine="69"/>
-      </Position5>
-      <Position6>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="248" Column="5" TopLine="246"/>
-      </Position6>
-      <Position7>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="252" Column="42" TopLine="245"/>
-      </Position7>
-      <Position8>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="262" Column="21" TopLine="245"/>
-      </Position8>
-      <Position9>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="87" Column="71" TopLine="70"/>
-      </Position9>
-      <Position10>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="88" Column="50" TopLine="69"/>
-      </Position10>
-      <Position11>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="87" Column="78" TopLine="69"/>
-      </Position11>
-      <Position12>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="143" Column="49" TopLine="125"/>
-      </Position12>
-      <Position13>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="150" Column="48" TopLine="125"/>
-      </Position13>
-      <Position14>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="170" Column="15" TopLine="154"/>
-      </Position14>
-      <Position15>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="171" Column="30" TopLine="154"/>
-      </Position15>
-      <Position16>
-        <Filename Value="..\MiConfigINI.pas"/>
-        <Caret Line="99" Column="11" TopLine="70"/>
-      </Position16>
-      <Position17>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="171" Column="30" TopLine="154"/>
-      </Position17>
-      <Position18>
-        <Filename Value="..\MiConfigBasic.pas"/>
-        <Caret Line="575" Column="20" TopLine="547"/>
-      </Position18>
-      <Position19>
-        <Filename Value="FormConfig.pas"/>
-        <Caret Line="8" Column="27"/>
-      </Position19>
-      <Position20>
-        <Filename Value="FormConfig.pas"/>
-        <Caret Line="94" TopLine="67"/>
-      </Position20>
-      <Position21>
-        <Filename Value="..\MiConfigINI.pas"/>
-        <Caret Line="74" Column="15" TopLine="57"/>
-      </Position21>
-      <Position22>
-        <Filename Value="..\MiConfigINI.pas"/>
-        <Caret Line="75" Column="51" TopLine="57"/>
-      </Position22>
-      <Position23>
-        <Filename Value="..\MiConfigINI.pas"/>
-        <Caret Line="83" Column="21" TopLine="57"/>
-      </Position23>
-      <Position24>
-        <Filename Value="..\MiConfigINI.pas"/>
-        <Caret Line="149" Column="49" TopLine="121"/>
-      </Position24>
-      <Position25>
-        <Filename Value="..\MiConfigINI.pas"/>
-        <Caret Line="156" Column="48" TopLine="128"/>
-      </Position25>
-      <Position26>
-        <Filename Value="..\MiConfigINI.pas"/>
-        <Caret Line="183" Column="30" TopLine="155"/>
-      </Position26>
-      <Position27>
-        <Filename Value="..\MiConfigINI.pas"/>
-        <Caret Line="223" Column="42" TopLine="194"/>
-      </Position27>
-      <Position28>
-        <Filename Value="..\MiConfigINI.pas"/>
-        <Caret Line="231" Column="21" TopLine="202"/>
-      </Position28>
-      <Position29>
-        <Filename Value="..\MiConfigXML.pas"/>
-        <Caret Line="37" TopLine="37"/>
-      </Position29>
-      <Position30>
-        <Filename Value="FormConfig.pas"/>
-        <Caret Line="93" TopLine="67"/>
-      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

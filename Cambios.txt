@@ -1,3 +1,8 @@
+Cambios en la versión 0.4.2
+===========================
+Se traduce al inglés y se amplía la documentación de la librería.
+Se simplifica un proyecto de ejemplo.
+
 Cambios en la versión 0.4.1
 ===========================
 Se hace accesible el campo FileName, con el método SetFileName().

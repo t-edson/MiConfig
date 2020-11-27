@@ -2,22 +2,21 @@ unit FormConfig;
 {$mode objfpc}{$H+}
 interface
 uses
-  Forms, Graphics, Buttons, StdCtrls, MiConfigINI, MisUtils;
+  Forms, Graphics, Buttons, StdCtrls, MiConfigINI;
 type
   { TConfig }
   TConfig = class(TForm)
     BitCancel: TBitBtn;
-    BitAceptar: TBitBtn;
+    BitOK: TBitBtn;
     Edit1: TEdit;
-    Label2: TLabel;
-    procedure BitAceptarClick(Sender: TObject);
+    procedure BitOKClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
   public
-    //vars to manage
+    //Variables to manage
     MyText : string;
     procedure Initiate(f: TForm);
-    procedure SaveToFile;
   end;
 
 var
@@ -37,7 +36,7 @@ begin
   //asociate vars to controls
   cfgFile.Asoc_Str('MyText', @MyText, Edit1, '');
   if not cfgFile.FileToProperties then begin
-    MsgErr(cfgFile.MsjErr);
+    Application.MessageBox(PChar(cfgFile.MsjErr), '');
   end;
 end;
 
@@ -46,20 +45,20 @@ begin
   cfgFile.PropertiesToWindow;
 end;
 
-procedure TConfig.BitAceptarClick(Sender: TObject);
+procedure TConfig.BitOKClick(Sender: TObject);
 begin
   cfgFile.WindowToProperties;
   if cfgFile.MsjErr<>'' then begin
-    MsgErr(cfgFile.MsjErr);
+    Application.MessageBox(PChar(cfgFile.MsjErr), '');
     exit;
   end;
   self.Close;
 end;
 
-procedure TConfig.SaveToFile;
+procedure TConfig.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   if not cfgFile.PropertiesToFile then begin
-    MsgErr(cfgFile.MsjErr);
+    Application.MessageBox(PChar(cfgFile.MsjErr), '');
   end;
 end;
 
