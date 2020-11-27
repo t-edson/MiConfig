@@ -36,7 +36,7 @@ This code will write the value of the variables associated to a file and then wi
 
 Note we are not using controls to editing the content of the variables, we just are associating variables to disk.
 
-## Associating variables to controls
+## Associating variables to file and to controls
 
 The previous example only associate variables to a file, so they can be read or written in disk. The folw of infromation follows the next figure:
 
