@@ -1,6 +1,13 @@
 Cambios en la versión 0.4.2
 ===========================
 Se traduce al inglés y se amplía la documentación de la librería.
+Se hace visible al campo "TParElem.pCtl".
+Se cambia el nombre de "TTipPar" a "TAssocType".
+Se cambia el nombre de "tipPar" a "asType".
+Se cambia el nombre de "etiqVar" a "asLabel".
+Se cambia el nombre de "pCtl" a "ctlRef".
+Se cambia el nombre de "pVar" a "varRef".
+Se cambia el nombre de "lVar" a "varSiz".
 Se simplifica un proyecto de ejemplo.
 
 Cambios en la versión 0.4.1

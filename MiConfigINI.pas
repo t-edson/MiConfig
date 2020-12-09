@@ -113,47 +113,47 @@ var
   strlst: TStringList;
   c: TColor;
 begin
-  if r.pVar = nil then exit;   //se inició con NIL
-  case r.tipPar of
+  if r.varRef = nil then exit;   //se inició con NIL
+  case r.asType of
   tp_Int, tp_Int_TEdit, tp_Int_TSpinEdit, tp_Int_TRadioGroup:
     if FileToProp then begin  //lee entero
-      r.AsInteger := iniCfg.ReadInteger(secINI, r.etiqVar, r.defInt);
+      r.AsInteger := iniCfg.ReadInteger(secINI, r.asLabel, r.defInt);
     end else begin
-      iniCfg.WriteInteger(secINI, r.etiqVar, r.AsInteger);
+      iniCfg.WriteInteger(secINI, r.asLabel, r.AsInteger);
     end;
   //---------------------------------------------------------------------
   tp_Dbl, tp_Dbl_TEdit, tp_Dbl_TFloatSpinEdit:
     if FileToProp then begin
-      r.AsDouble := iniCfg.ReadFloat(secINI, r.etiqVar, r.defDbl);
+      r.AsDouble := iniCfg.ReadFloat(secINI, r.asLabel, r.defDbl);
     end else begin
-      iniCfg.WriteFloat(secINI, r.etiqVar, r.AsDouble);
+      iniCfg.WriteFloat(secINI, r.asLabel, r.AsDouble);
     end;
   //---------------------------------------------------------------------
   tp_Str, tp_Str_TEdit, tp_Str_TEditButton, tp_Str_TCmbBox:
     if FileToProp then begin  //lee cadena
-      r.AsString := DecodeStr(iniCfg.ReadString(secINI, r.etiqVar, '.'+r.defStr+'.'));
+      r.AsString := DecodeStr(iniCfg.ReadString(secINI, r.asLabel, '.'+r.defStr+'.'));
     end else begin
-      iniCfg.WriteString(secINI, r.etiqVar, CodeStr(r.AsString));
+      iniCfg.WriteString(secINI, r.asLabel, CodeStr(r.AsString));
     end;
   //---------------------------------------------------------------------
   tp_Bol, tp_Bol_TCheckBox, tp_Bol_TRadBut:
     if FileToProp then begin  //lee booleano
-      r.AsBoolean := iniCfg.ReadBool(secINI, r.etiqVar, r.defBol);
+      r.AsBoolean := iniCfg.ReadBool(secINI, r.asLabel, r.defBol);
     end else begin
-      iniCfg.WriteBool(secINI, r.etiqVar, r.AsBoolean);
+      iniCfg.WriteBool(secINI, r.asLabel, r.AsBoolean);
     end;
   //---------------------------------------------------------------------
   tp_Enum, tp_Enum_TRadBut, tp_Enum_TRadGroup:
     if FileToProp then begin  //lee enumerado como entero
-       if r.lVar = 4 then begin  //tamaño común de las variable enumeradas
-         r.AsInt32 := iniCfg.ReadInteger(secINI, r.etiqVar, r.defInt);
+       if r.varSiz = 4 then begin  //tamaño común de las variable enumeradas
+         r.AsInt32 := iniCfg.ReadInteger(secINI, r.asLabel, r.defInt);
        end else begin  //tamaño no implementado
          msjErr := 'Enumerated type no handled.';
          exit;
        end;
     end else begin
-      if r.lVar = 4 then begin
-        iniCfg.WriteInteger(secINI, r.etiqVar, r.AsInt32);  //como entero de 4 bytes
+      if r.varSiz = 4 then begin
+        iniCfg.WriteInteger(secINI, r.asLabel, r.AsInt32);  //como entero de 4 bytes
       end else begin  //tamaño no implementado
         msjErr := 'Enumerated type no handled.';
         exit;
@@ -162,22 +162,22 @@ begin
   //---------------------------------------------------------------------
   tp_TCol_TColBut, tp_TCol_TColBox:
     if FileToProp then begin  //lee TColor
-      r.AsTColor := iniCfg.ReadInteger(secINI, r.etiqVar, r.defCol);
+      r.AsTColor := iniCfg.ReadInteger(secINI, r.asLabel, r.defCol);
     end else begin
       c := r.AsTColor;
-      iniCfg.WriteInteger(secINI, r.etiqVar, c);
+      iniCfg.WriteInteger(secINI, r.asLabel, c);
     end;
   tp_StrList, tp_StrList_TListBox:
     if FileToProp then  begin //lee TStringList
-      list := TStringList(r.Pvar^);
-      iniCfg.ReadSection(secINI+'_'+r.etiqVar, list);
+      list := TStringList(r.varRef^);
+      iniCfg.ReadSection(secINI+'_'+r.asLabel, list);
       //decodifica cadena
       for n:=0 to list.Count-1 do list[n] := DecodeStr(list[n]);
     end else begin
-      strlst := TStringList(r.Pvar^);
-      iniCfg.EraseSection(secINI+'_'+r.etiqVar);
+      strlst := TStringList(r.varRef^);
+      iniCfg.EraseSection(secINI+'_'+r.asLabel);
       for j:= 0 to strlst.Count-1 do begin
-        iniCfg.WriteString(secINI+'_'+r.etiqVar,
+        iniCfg.WriteString(secINI+'_'+r.asLabel,
                            CodeStr(strlst[j]),'');
       end;
     end;

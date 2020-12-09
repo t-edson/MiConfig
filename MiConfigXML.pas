@@ -103,51 +103,51 @@ var
   c: TColor;
   list: TStringList;
 begin
-  if r.pVar = nil then exit;   //se inició con NIL
-  case r.tipPar of
+  if r.varRef = nil then exit;   //se inició con NIL
+  case r.asType of
   tp_Int, tp_Int_TEdit, tp_Int_TSpinEdit, tp_Int_TRadioGroup:
     if FileToProp then begin  //lee entero
-      r.AsInteger := xmlCfg.GetValue(r.etiqVar + '/Val', r.defInt)
+      r.AsInteger := xmlCfg.GetValue(r.asLabel + '/Val', r.defInt)
     end else begin
-      xmlCfg.SetValue(r.etiqVar + '/Val', r.AsInteger) ;
+      xmlCfg.SetValue(r.asLabel + '/Val', r.AsInteger) ;
     end;
   //---------------------------------------------------------------------
   tp_Dbl, tp_Dbl_TEdit, tp_Dbl_TFloatSpinEdit:
     //No hay métodos para leer/escribir números flotantes. Se usarán cadena
     if FileToProp then begin
       defStr := FloatToStr(r.defDbl);
-      s := xmlCfg.GetValue(r.etiqVar + '/Val', defStr);  //lee como cadena
+      s := xmlCfg.GetValue(r.asLabel + '/Val', defStr);  //lee como cadena
       r.AsDouble := StrToFloat(s);
     end else begin
       s := FloatToStr(r.AsDouble);
-      xmlCfg.SetValue(r.etiqVar + '/Val', s) ;
+      xmlCfg.SetValue(r.asLabel + '/Val', s) ;
     end;
   //---------------------------------------------------------------------
   tp_Str, tp_Str_TEdit, tp_Str_TEditButton, tp_Str_TCmbBox:
     if FileToProp then begin  //lee cadena
-      r.AsString := xmlCfg.GetValue(r.etiqVar + '/Val', r.defStr);
+      r.AsString := xmlCfg.GetValue(r.asLabel + '/Val', r.defStr);
     end else begin
-      xmlCfg.SetValue(r.etiqVar + '/Val', r.AsString) ;
+      xmlCfg.SetValue(r.asLabel + '/Val', r.AsString) ;
     end;
   //---------------------------------------------------------------------
   tp_Bol, tp_Bol_TCheckBox, tp_Bol_TRadBut:
     if FileToProp then begin  //lee booleano
-      r.AsBoolean := xmlCfg.GetValue(r.etiqVar + '/Val', r.defBol);
+      r.AsBoolean := xmlCfg.GetValue(r.asLabel + '/Val', r.defBol);
     end else begin
-      xmlCfg.SetValue(r.etiqVar + '/Val', r.AsBoolean);
+      xmlCfg.SetValue(r.asLabel + '/Val', r.AsBoolean);
     end;
   //---------------------------------------------------------------------
   tp_Enum, tp_Enum_TRadBut, tp_Enum_TRadGroup:
     if FileToProp then begin  //lee enumerado como entero
-       if r.lVar = 4 then begin  //tamaño común de las variable enumeradas
-         r.AsInt32 := xmlCfg.GetValue(r.etiqVar + '/Val', r.defInt);
+       if r.varSiz = 4 then begin  //tamaño común de las variable enumeradas
+         r.AsInt32 := xmlCfg.GetValue(r.asLabel + '/Val', r.defInt);
        end else begin  //tamaño no implementado
          msjErr := 'Enumerated type no handled.';
          exit;
        end;
     end else begin
-      if r.lVar = 4 then begin
-        xmlCfg.SetValue(r.etiqVar + '/Val', r.AsInt32) ;
+      if r.varSiz = 4 then begin
+        xmlCfg.SetValue(r.asLabel + '/Val', r.AsInt32) ;
       end else begin  //tamaño no implementado
         msjErr := 'Enumerated type no handled.';
         exit;
@@ -156,18 +156,18 @@ begin
   //---------------------------------------------------------------------
   tp_TCol_TColBut, tp_TCol_TColBox:
     if FileToProp then begin  //lee TColor
-      r.AsTColor := xmlCfg.GetValue(r.etiqVar + '/Val',  r.defCol);  //lee como entero
+      r.AsTColor := xmlCfg.GetValue(r.asLabel + '/Val',  r.defCol);  //lee como entero
     end else begin
       c := r.AsTColor;
-      xmlCfg.SetValue(r.etiqVar + '/Val', c) ;  //escribe como entero
+      xmlCfg.SetValue(r.asLabel + '/Val', c) ;  //escribe como entero
     end;
   tp_StrList, tp_StrList_TListBox:
     if FileToProp then  begin //lee TStringList
-      list := TStringList(r.Pvar^);
-      list.Text := xmlCfg.GetValue(r.etiqVar + '/Val', '');  //lee como texto
+      list := TStringList(r.varRef^);
+      list.Text := xmlCfg.GetValue(r.asLabel + '/Val', '');  //lee como texto
     end else begin
-      list := TStringList(r.Pvar^);
-      xmlCfg.SetValue(r.etiqVar + '/Val', list.Text);  //escribe como texto
+      list := TStringList(r.varRef^);
+      xmlCfg.SetValue(r.asLabel + '/Val', list.Text);  //escribe como texto
     end;
   else  //no se ha implementado bien
     msjErr := 'Design error.';

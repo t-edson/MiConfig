@@ -296,3 +296,22 @@ begin
   self.Close;
 end;
 ```
+
+Other way to check for errors is compare the returned value of the method:
+
+```
+  if not cfgFile.WindowToProperties then begin
+    MsgErr(cfgFile.MsjErr);
+  end;
+```
+
+To have more precision about the error, we can access to the field "ctlErr" that is the association object (like created with Asoc_Int(), Asoc_Str(), ...), where the error is produced. Accessing to "ctlErr" allows to get more information of the error:
+
+```
+  if not cfgFile.WindowToProperties then begin
+    MsgErr(cfgFile.MsjErr +
+      ' at label "' + cfgFile.ctlErr.asLabel +
+      '" in control "' + cfgFile.ctlErr.ctlRef.ClassName + '"');
+  end;
+```
+
