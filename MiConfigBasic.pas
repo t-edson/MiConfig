@@ -448,16 +448,17 @@ begin
   end;
 end;
 function TMiConfigBasic.PropertiesToWindow: boolean;
-{Muestra en los controles, las variables asociadas
+{Muestra en los controles, las variables asociadas.
 Si encuentra error devuelve FALSE, y el mensaje de error en "MsjErr", y el elemento
 con error en "ctlErr".}
 var
   r: TParElem;
 begin
   msjErr := '';
+  ctlErr := nil;
   for r in listParElem do begin
     PropertyWindow(r, true);
-    if msjErr<>'' then begin
+    if (msjErr<>'') and (ctlErr=nil) then begin
       ctlErr := r;  //guarda la referencia al elemento, en caso de que haya error
     end;
     if r.OnPropertyToWindow<>nil then r.OnPropertyToWindow;
@@ -472,9 +473,10 @@ var
   r: TParElem;
 begin
   msjErr := '';
+  ctlErr := nil;
   for r in listParElem do begin
     PropertyWindow(r, false);
-    if msjErr<>'' then begin
+    if (msjErr<>'') and (ctlErr=nil) then begin
       ctlErr := r;  //guarda la referencia al elemento, en caso de que haya error
     end;
     if r.OnWindowToProperty<>nil then r.OnWindowToProperty;
