@@ -7,7 +7,7 @@ MiConfig is a Lazarus library, which can be used to easily create setting forms 
 
 With this library, the creation of settings forms is considerably simplified, because the library includes predefined methods that facilitate the manipulation of variables (properties) of the application, so that editing them in a dialog and saving the changes to disk, are done almost transparent.
 
-INI or XML files cam be used.
+INI or XML files can be used.
 
 ## A Hello world example
 
