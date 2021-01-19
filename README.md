@@ -38,7 +38,7 @@ Note we are not using controls to editing the content of the variables, we just 
 
 ## Associating variables to file and to controls
 
-The previous example only associate variables to a file, so they can be read or written in disk. The folw of infromation follows the next figure:
+The previous example only associate variables to a file, so they can be read or written in disk. The flow of information follows the next figure:
 
 ```
  +-----------+                  +-------------+ 
